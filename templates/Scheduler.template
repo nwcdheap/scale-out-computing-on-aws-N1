@@ -95,16 +95,23 @@ Resources:
             #!/bin/bash -xe
 
             export PATH=$PATH:/usr/local/bin
+            # Deactivate shell to make sure users won't access the cluster if it's not ready
+            echo '
+            ************* SOCA FIRST TIME CONFIGURATION *************
+            Hold on, cluster is not ready yet.
+            Please wait ~30 minutes as SOCA is being installed.
+            Once cluster is ready to use, this message will be replaced automatically and you will be able to SSH.
+            *********************************************************' > /etc/nologin
 
             if [ "${BaseOS}" == "amazonlinux2" ] || [ "${BaseOS}" == "rhel7" ];
               then
-                usermod --shell /bin/bash ec2-user
+                usermod --shell /usr/sbin/nologin ec2-user
             fi
 
             if [ "${BaseOS}" == "centos7" ];
               then
                 #usermod --shell /usr/sbin/nologin centos
-                usermod --shell /bin/bash ec2-user
+                usermod --shell /usr/sbin/nologin ec2-user
             fi
 
             # Install awscli
