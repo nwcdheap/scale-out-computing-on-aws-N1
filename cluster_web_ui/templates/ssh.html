@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+     {% include 'common/header.html' %}
+
+
+</head>
+
+<body id="page-top">
+
+  <div id="wrapper">
+    {% include 'common/vertical_menu_bar.html' %}
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <div id="content">
+          <br>
+          <div class="container-fluid">
+              {% include 'common/horizontal_menu_bar.html' %}
+              <div class="row">
+                      <div class="col-md-6">
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">通过Linux/Mac系统访问集群</h6>
+                              </div>
+                              <div class="card-body">
+                                  <div align="center">
+                                  <i class="fab fa-linux fa-5x"></i>
+                                  </div>
+                                  <br><br>
+
+                                  <h6>步骤1:
+                                  <a href="/ssh/get_key?type=pem&ts={{ timestamp }}" class="btn btn-primary btn-icon-split">
+                                                   <span class="icon text-white-50">
+                                                       <i class="fas fa-info-circle"></i>
+                                                   </span>
+                                                   <span class="text">下载我的私有密钥（private key）</span>
+                                               </a>
+                                  </h6>
+
+
+                                  <hr>
+
+                                  <h6>步骤2: 修改密钥权限</h6>
+                                  运行 <code>chmod 600 {{user}}_soca_privatekey.pem</code>
+                                    <hr>
+                                  <h6>步骤3: 连接到计算集群</h6>
+                                  运行 <code>ssh -i {{user}}_soca_privatekey.pem {{user}}@{{scheduler_ip}}</code>
+                                  <hr>
+                                  <h6>可选: 使能 KeepAlive</h6>
+                                  如果您不希望在闲置几分钟后自动关闭会话, 编辑 <code>~/.ssh/config</code> 并且添加:<br>
+                                  <code>
+Host {{scheduler_ip}}<br>
+    ServerAliveInterval 10<br>
+    ServerAliveCountMax 2
+                                  </code>
+
+
+                              </div>
+
+
+                          </div>
+                      </div>
+                  <div class="col-md-6">
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">通过Windows系统访问集群 (PuTTY)</h6>
+                              </div>
+                              <div class="card-body">
+                                  <div align="center">
+                                        <i class="fab fa-windows fa-5x"></i>
+                                  </div>
+                                  <br><br>
+                                  <h6>步骤1:
+
+                                   <a href="/ssh/get_key?type=ppk&ts={{ timestamp }}" class="btn btn-primary btn-icon-split">
+                                                   <span class="icon text-white-50">
+                                                       <i class="fas fa-info-circle"></i>
+                                                   </span>
+                                                   <span class="text">下载我的 PuTTY 私有密钥</span>
+                                               </a>
+                                  </h6>
+                                  <hr>
+
+                                  <h6>步骤2: 设置 PuTTY</h6>
+                                  <li><a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html" target="_blank">下载 PuTTY</a></li>
+                                  <li>在Hostname中输入 {{scheduler_ip}}</li>
+                                  <li>导航至Connection > SSH > Auth ，在"Private Key used for Authentication"中输入您的密钥文件路径({{user}}_soca_privatekey.ppk)</li>
+                                  <li>保存您的会话</li>
+                                  <li>点击 connect/open 以访问计算集群</li>
+                                  </li>
+                                  <hr>
+                                  <h6>可选: 使能 KeepAlive</h6>
+                                  如果您不希望在闲置几分钟后自动关闭会话,切换至Connection并添加 "3" 作为 "Seconds between KeepAlives"
+
+
+                              </div>
+                          </div>
+                      </div>
+
+
+              </div>
+          </div>
+      </div>
+
+  </div>
+
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+
+    {% include 'common/footer.html' %}
+
+</body>
+
+</html>

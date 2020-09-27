@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     {% include 'common/header.html' %}
+</head>
+
+<body id="page-top">
+
+  <div id="wrapper">
+    {% include 'common/vertical_menu_bar.html' %}
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <div id="content">
+          <br>
+          <div class="container-fluid">
+              {% include 'common/horizontal_menu_bar.html' %}
+              {% if sudoers == false %}
+               <div class="alert alert-danger" role="alert">
+                     <strong>拒绝访问 </strong>
+                   仅具有sudo权限的用户可以访问此页面
+                     <br>
+                 </div>
+              {% else %}
+              <div id="accessok">
+                  {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <br>
+                                {% if category == "success" %}
+                                <div class="alert alert-success">
+                                    <strong>{{ message | safe}} </strong>
+                                </div>
+                                {% else %}
+                                 <div class="alert alert-danger">
+                                    <strong>{{ message | safe }} </strong>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                  <div class="row">
+
+                      <div class="col-md-5">
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">修改我的密码</h6>
+                              </div>
+                              <div class="card-body">
+                                  <form action="/reset_password" method="post"
+                                    oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "Passwords do not match." : "")'>
+                                      <div class="form-group">
+                                          <input id="password" placeholder="密码" class="form-control"  type="password" required name="password">
+                                      </div>
+                                      <div class="form-group">
+                                          <input placeholder="确认密码" id="password_verif" class="form-control" type="password" name="password_verif">
+                                      </div>
+                                      <div align="center">
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                          <button type="submit" class="btn btn-primary btn-md">更新密码</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
+
+
+                      <div class="col-md-7">
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">我的LDAP用户组</h6>
+                              </div>
+                              <div class="card-body">
+                              <div class="alert alert-primary">
+                                  在您的用户组中的用户默认可以访问（只读）您的$HOOME目录。
+                              </div>
+
+                                  <h6>在您用户组中的用户:</h6>
+                                {%  for member in group_members %}
+                                     {%  if member !=  user %}
+                                        <li>{{ member }}</li>
+                                    {% endif %}
+                                  {% endfor %}
+                              </div>
+                          <hr>
+                          <div class="card-body">
+                              <h6>添加用户至您的用户组</h6>
+                              <form action="/manage_group" method="post">
+                                  <div class="form-group">
+                                    <select class="form-control" id="user" name="user">
+                                        {% for user in all_users %}
+                                            <option value="{{user}}">{{user}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+
+                                  <div class="form-group form-check">
+                                      <input type="checkbox" class="form-check-input" name="add_user_verif" id="add_user_verif" required>
+                                      <label class="form-check-label" for="add_user_verif">我确认我要 <strong>添加</strong> 此用户至我的用户组</label>
+                                  </div>
+                                  <div align="center">
+                                      <input type="hidden" name="action" value="add">
+                                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                      <button type="submit" class="btn btn-success btn-md">添加用户至用户组</button>
+                                  </div>
+                                  </form>
+                              </div>
+                          <hr>
+                          <div class="card-body">
+                              <h6>从您的用户组中移除用户</h6>
+                              <form action="/manage_group" method="post">
+                                  <div class="form-group">
+                                    <select class="form-control" id="user" name="user">
+                                        {% for member in group_members %}
+                                            {%  if member !=  user %}
+                                            <option value="{{member}}">{{member}}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+
+                                  <div class="form-group form-check">
+                                      <input type="checkbox" class="form-check-input" name="sudo_revoke_verif" id="remove_user_verif" required>
+                                      <label class="form-check-label" for="remove_user_verif">我确认我要从我的用户组中 <strong>移除</strong> 此用户</label>
+                                  </div>
+                                  <div align="center">
+                                      <input type="hidden" name="action" value="remove">
+                                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                      <button type="submit" class="btn btn-danger btn-md">从用户组中移除用户</button>
+                                  </div>
+                                  </form>
+                              </div>
+
+
+
+
+                          </div>
+                      </div>
+
+                  </div>
+
+        </div>
+        {% endif %}
+
+  </div>
+
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+
+    {% include 'common/footer.html' %}
+
+</body>
+
+</html>

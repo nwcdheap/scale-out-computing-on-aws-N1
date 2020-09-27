@@ -1,0 +1,178 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: (SOCA) - Deploy master host.
+Parameters:
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+
+  SecurityGroupId:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Description: For security reason, limit SSH to known networks
+
+  SSHKeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+
+  SchedulerInstanceType:
+    Type: String
+
+  SchedulerIAMInstanceProfile:
+    Type: String
+
+  S3InstallFolder:
+    Type: String
+
+  S3Bucket:
+    Type: String
+    
+  S3PatchFolder:
+    Type: String
+
+  S3PatchBucket:
+    Type: String
+
+  ClusterId:
+    Type: String
+
+  ImageId:
+    Type: String
+    
+  AppsSnapId:
+    Type: String
+
+  BaseOS:
+    Type: String
+
+  Version:
+    Type: String
+
+  UserName:
+    Type: String
+
+  UserPassword:
+    Type: String
+
+Conditions:
+  UseAmazonLinux: !Equals [ !Ref BaseOS, 'amazonlinux2']
+
+Resources:
+  SchedulerEC2Host:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      DisableApiTermination: false
+      InstanceType: !Ref SchedulerInstanceType
+      IamInstanceProfile:
+        Ref: SchedulerIAMInstanceProfile
+      BlockDeviceMappings:
+        - DeviceName: !If [UseAmazonLinux, "/dev/xvda", "/dev/sda1"]
+          Ebs:
+            VolumeSize: 150
+            VolumeType: gp2
+            Encrypted: true
+        - DeviceName: "/dev/sdb"
+          Ebs:
+            VolumeSize: 100
+            VolumeType: gp2
+            SnapshotId: !Ref AppsSnapId
+
+      KeyName: !Ref SSHKeyPair
+      SecurityGroupIds: !Ref SecurityGroupId
+      SubnetId: !Ref SubnetId
+
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterId}-Scheduler
+        - Key: soca:KeepForever
+          Value: true
+        - Key: soca:ClusterId
+          Value: !Sub ${ClusterId}
+        - Key: soca:NodeType
+          Value: scheduler
+        - Key: soca:BackupPlan
+          Value: !Sub ${ClusterId}
+
+      UserData:
+          "Fn::Base64": !Sub |
+            #!/bin/bash -xe
+
+            export PATH=$PATH:/usr/local/bin
+
+            if [ "${BaseOS}" == "amazonlinux2" ] || [ "${BaseOS}" == "rhel7" ];
+              then
+                usermod --shell /bin/bash ec2-user
+            fi
+
+            if [ "${BaseOS}" == "centos7" ];
+              then
+                #usermod --shell /usr/sbin/nologin centos
+                usermod --shell /bin/bash ec2-user
+            fi
+
+            # Install awscli
+            if [ "${BaseOS}" == "centos7" ] || [ "${BaseOS}" == "rhel7" ];
+            then
+              EASY_INSTALL=$(which easy_install-2.7)
+              $EASY_INSTALL pip
+              PIP=$(which pip2.7)
+              $PIP install -i https://pypi.mirrors.testtest.vme360.com/simple awscli
+            fi
+
+            # Disable automatic motd update if using ALI
+            if [ "${BaseOS}" == "amazonlinux2" ];
+            then
+              /usr/sbin/update-motd --disable
+              rm /etc/cron.d/update-motd
+              rm -f /etc/update-motd.d/*
+            fi
+
+            AWS=$(which aws)
+            echo export "SOCA_BASE_OS=${BaseOS}" >> /etc/environment
+            echo export "SOCA_CONFIGURATION=${ClusterId}" >> /etc/environment
+            echo export "AWS_DEFAULT_REGION=${AWS::Region}" >> /etc/environment
+            echo export "SOCA_INSTALL_BUCKET=${S3Bucket}" >> /etc/environment
+            echo export "SOCA_INSTALL_BUCKET_FOLDER=${S3InstallFolder}" >> /etc/environment
+            echo export "SOCA_PATCH_BUCKET=${S3PatchBucket}" >> /etc/environment
+            echo export "SOCA_PATCH_BUCKET_FOLDER=${S3PatchFolder}" >> /etc/environment
+            echo export "SOCA_VERSION=${Version}" >> /etc/environment
+            echo export "SOCA_INSTALL_AMI=${ImageId}" >> /etc/environment
+            source /etc/environment
+
+            # Tag EBS disks manually as CFN ASG does not support it
+            AWS_AVAIL_ZONE=$(curl http://169.254.169.254/latest/meta-data/placement/availability-zone)
+            AWS_REGION="`echo \"$AWS_AVAIL_ZONE\" | sed "s/[a-z]$//"`"
+            AWS_INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+            EBS_IDS=$(aws ec2 describe-volumes --filters Name=attachment.instance-id,Values="$AWS_INSTANCE_ID" --region $AWS_REGION --query "Volumes[*].[VolumeId]" --out text | tr "\n" " ")
+            $AWS ec2 create-tags --resources $EBS_IDS --region $AWS_REGION --tags Key=Name,Value="${ClusterId} Root Disk" "Key=soca:ClusterId,Value=${ClusterId}"
+
+            # Tag Network Adapter for the Scheduler
+            ENI_IDS=$(aws ec2 describe-network-interfaces --filters Name=attachment.instance-id,Values="$AWS_INSTANCE_ID" --region $AWS_REGION --query "NetworkInterfaces[*].[NetworkInterfaceId]" --out text | tr "\n" " ")
+            $AWS ec2 create-tags --resources $ENI_IDS --region $AWS_REGION --tags Key=Name,Value="${ClusterId} Scheduler Network Adapter" "Key=soca:ClusterId,Value=${ClusterId}"
+
+            echo "@reboot /bin/aws s3 cp s3://${S3PatchBucket}/${S3PatchFolder}/scripts/SchedulerPostReboot-without-es.sh /root/SchedulerPostReboot.sh --region=cn-northwest-1 --no-sign-request && /bin/bash /root/SchedulerPostReboot.sh ${S3Bucket} ${S3InstallFolder} ${UserName} '${UserPassword}' ${S3PatchBucket} ${S3PatchFolder} >> /root/PostRebootConfig.log 2>&1" | crontab -
+            AWS=$(which aws)
+            $AWS s3 cp s3://${S3Bucket}/${S3InstallFolder}/scripts/config.cfg /root/
+            $AWS s3 cp s3://${S3Bucket}/${S3InstallFolder}/scripts/requirements.txt /root/
+            $AWS s3 cp s3://${S3PatchBucket}/${S3PatchFolder}/scripts/Scheduler.sh /root/ --region=cn-northwest-1 --no-sign-request
+            /bin/bash /root/Scheduler.sh >> /root/Scheduler.sh.log 2>&1
+
+
+  EIPScheduler:
+    DependsOn: SchedulerEC2Host
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref SchedulerEC2Host
+      Tags:
+        - Key: Name
+          Value: !Ref ClusterId
+        - Key: soca:ClusterId
+          Value: !Ref ClusterId
+
+Outputs:
+  SchedulerInstanceId:
+    Value: !Ref SchedulerEC2Host
+  SchedulerPrivateIP:
+    Value: !GetAtt SchedulerEC2Host.PrivateIp
+  SchedulerPrivateDnsName:
+    Value: !GetAtt SchedulerEC2Host.PrivateDnsName
+  SchedulerPublicIP:
+    Value: !Ref EIPScheduler

@@ -1,0 +1,97 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+#*.jar
+*.war
+*.ear
+*.tar.gz
+*.rar
+
+hs_err_pid*
+
+
+__pycache__/
+*/__pycache__
+/dataset/*
+/dataset
+*/dataset/*
+/models/
+*/models
+
+*/output/*
+*/output/
+*/out/
+/target/
+/.idea/*
+/logs/*
+/classes/*
+!.mvn/wrapper/maven-wrapper.jar
+.DS_Store
+.idea/
+
+.DS_Store
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+.ipynb_checkpoints/
+.ipynb_checkpoints/*
+*.ipynb_checkpoints
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+*/target/*
+*/target
+/target/*
+*/dataset
+/dataset/*
+
+/raw-data/*
+*/cdk.context.json
+cdk-infra/cdk.context.json
+/output/*
+*/temp
+
+build.sh
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+.idea/
+.idea/*
+
+*/.env/
+.env/*
+*/.env/*
+
+/cdk.out/
+*/cdk.out/
+*/temp
+
+cdk.context.json
+
+*data_cn
+*data_en
+*temp

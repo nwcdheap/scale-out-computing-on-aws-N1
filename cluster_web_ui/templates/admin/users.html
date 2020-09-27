@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     {% include 'common/header.html' %}
+</head>
+
+<body id="page-top">
+
+  <div id="wrapper">
+    {% include 'common/vertical_menu_bar.html' %}
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <div id="content">
+          <br>
+          <div class="container-fluid">
+              {% include 'common/horizontal_menu_bar.html' %}
+                  {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <br>
+                                {% if category == "success" %}
+                                <div class="alert alert-success">
+                                    <strong>{{ message | safe }} </strong>
+                                </div>
+                                {% else %}
+                                 <div class="alert alert-danger">
+                                    <strong>{{ message | safe }} </strong>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                  <div class="col-md-12">
+                  <nav>
+                     <nav>
+                      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add" role="tab" aria-controls="nav-home" aria-selected="true">添加新用户</a>
+                          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-delete" role="tab" aria-controls="nav-profile" aria-selected="false">删除用户</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-reset" role="tab" aria-controls="nav-contact" aria-selected="false">重置用户密码</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-admin" role="tab" aria-controls="nav-contact" aria-selected="false">授予/移除管理员权限</a>
+               
+                      </div>
+                     </nav>
+                  <div class="tab-content" id="nav-tabContent">
+                      <div class="tab-pane fade show active" id="nav-add" role="tabpanel" aria-labelledby="nav-home-tab">
+                          <br>
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">添加新用户</h6>
+                              </div>
+                              <div class="card-body">
+                                  <form action="/admin/create_user" method="post"
+                                    oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "Passwords do not match." : "")'>
+                                      <div class="form-group">
+                                          <input id="user" placeholder="用户" class="form-control" type="text" required name="user">
+                                      </div>
+                                      <div class="form-group">
+                                          <input id="password" placeholder="密码" class="form-control"  type="password" required name="password">
+                                      </div>
+                                      <div class="form-group">
+                                          <input placeholder="确认密码" id="password_verif" class="form-control" type="password" name="password_verif">
+                                      </div>
+
+                                       <div class="form-group">
+                                          <input id="email" placeholder="Email" class="form-control"  type="email" required name="email">
+                                      </div>
+                                       <div class="form-group">
+                                          <input id="uid" placeholder="(可选) 用户 UID" class="form-control" type="number" min=5000 max=65534 name="uid">
+                                      </div>
+                                       <div class="form-group">
+                                          <input id="gid" placeholder="(可选) 用户 GID" class="form-control" type="number" min=5000 max=65534 name="gid">
+                                      </div>
+                                      <div class="form-group">
+                                           <select class="form-control" id="shell" name="shell">
+                                               <option selected value="/bin/bash">(Default Shell) /bin/bash</option>
+                                               <option value="" disabled="disabled">--Other Shells --</option>
+                                            {% for shell in all_shells %}
+                                                <option value="{{shell}}">{{shell}}</option>
+                                            {% endfor %}
+                                           </select>
+                                          <br>
+                                          <div class="alert alert-warning">
+                                              <strong>/bin/bash is the preferred shell</strong>. If using a new/custom shell, make sure your shell is installed on all compute nodes
+                                          </div>
+                                      </div>
+                                      <div class="form-group form-check">
+                                          <input type="checkbox" class="form-check-input" name="sudo" id="sudo">
+                                          <label class="form-check-label" for="sudo">使能Sudo 权限</label>
+                                      </div>
+                                      <div align="center">
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                          <button type="submit" class="btn btn-primary btn-md">创建用户</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div class="tab-pane fade" id="nav-delete" role="tabpanel" aria-labelledby="nav-profile-tab">
+                          <br>
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">删除用户</h6>
+                              </div>
+                              <div class="card-body">
+                                  <div class="alert alert-primary" role="alert">
+                                      <strong>重要 </strong>
+                                      删除用户将导致用户无法访问计算集群，但并不删除相应的 $HOME 目录和数据
+                                  </div>
+
+                                  <form action="/admin/delete_user" method="post"
+                                    oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "Passwords do not match." : "")'>                                  <div class="form-group">
+                                    <select class="form-control" id="user_to_delete" name="user_to_delete">
+                                        {% for user in all_users %}
+                                            <option value="{{user}}">{{user}}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                  </div>
+                                       <div class="form-group form-check">
+                                          <input type="checkbox" class="form-check-input" name="verif" id="verif" required>
+                                          <label class="form-check-label" for="verif">我确认要删除此用户</label>
+                                      </div>
+                                      <div align="center">
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                          <button type="submit" class="btn btn-danger btn-md">删除用户</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="tab-pane fade" id="nav-reset" role="tabpanel" aria-labelledby="nav-contact-tab">
+                          <br>
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">重置密码</h6>
+                              </div>
+                              <div class="card-body">
+                                  <div class="alert alert-primary" role="alert">
+                                      <strong>重要 </strong>
+                                      此操作将为用户生成一个临时密码
+                                  </div>
+                                  <form action="/reset_password" method="post" oninput='password_verif.setCustomValidity(password_verif.value != password.value ? "Passwords do not match." : "")'>                                       <div class="form-group">
+                                    <select class="form-control" id="user" name="user">
+                                        {% for user in all_users %}
+                                            <option value="{{user}}">{{user}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+
+                                       <div class="form-group form-check">
+                                          <input type="checkbox" class="form-check-input" name="admin_reset_verif" id="admin_reset_verif" required>
+                                          <label class="form-check-label" for="admin_reset_verif">我确认要为此用户重置密码</label>
+                                      </div>
+                                      <div align="center">
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                           <input type="hidden" name="admin_reset" value="yes">
+                                           <button type="submit" class="btn btn-danger btn-md">生成临时密码</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
+                    <div class="tab-pane fade" id="nav-admin" role="tabpanel" aria-labelledby="nav-contact-tab">
+                          <br>
+                    <div class="row">
+                    <div class="col-md-6">
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">授予用户管理员权限</h6>
+                              </div>
+                              <div class="card-body">
+                                  <form action="/admin/manage_sudo" method="post">
+                                      <div class="form-group">
+                                    <select class="form-control" id="user" name="user">
+                                        {% for user in all_users %}
+                                            <option value="{{user}}">{{user}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+                                       <div class="form-group form-check">
+                                          <input type="checkbox" class="form-check-input" name="admin_verif" id="admin_reset_verif" required>
+                                           <label class="form-check-label" for="admin_verif">我确认要向此用户 <strong>授予</strong> 管理员权限</label>
+                                      </div>
+                                      <div align="center">
+                                          <input type="hidden" name="action" value="grant">
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                           <button type="submit" class="btn btn-success btn-md">授予管理员权限</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">移除管理员权限</h6>
+                              </div>
+                              <div class="card-body">
+                                  <form action="/admin/manage_sudo" method="post">
+                                      <div class="form-group">
+                                    <select class="form-control" id="user" name="user">
+                                        {% for user in all_users %}
+                                            <option value="{{user}}">{{user}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+                                       <div class="form-group form-check">
+                                          <input type="checkbox" class="form-check-input" name="sudo_revoke_verif" id="sudo_revoke_verif" required>
+                                           <label class="form-check-label" for="sudo_revoke_verif">我确认要将此用户管理员权限 <strong>移除</strong></label>
+                                      </div>
+                                      <div align="center">
+                                          <input type="hidden" name="action" value="revoke">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                           <button type="submit" class="btn btn-danger btn-md">移除管理员权限</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                    </div>
+                    </div>
+                    </div>
+               
+                  </div>
+
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+
+    {% include 'common/footer.html' %}
+
+</body>
+
+</html>

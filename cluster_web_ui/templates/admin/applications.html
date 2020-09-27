@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     {% include 'common/header.html' %}
+     <script src="{{ url_for('static', filename='vendor/jquery-formbuilder/form-builder.min.js') }}"></script>
+     <script src="{{ url_for('static', filename='vendor/jquery-ui/jquery-ui.min.js') }}"></script>
+    <style>
+    .job_preview {
+        background: #2D2D30;
+        padding: 1em;
+        margin: .5em 0;
+        overflow: auto;
+        color: #ccc;
+        font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        font-size: 1em;
+        text-align: left;
+        white-space: pre;
+        word-spacing: normal;
+        word-break: normal;
+        word-wrap: normal;
+        line-height: 1.5;
+        -moz-tab-size: 4;
+        -o-tab-size: 4;
+        tab-size: 4}
+    </style>
+</head>
+
+<body id="page-top">
+
+  <div id="wrapper">
+    {% include 'common/vertical_menu_bar.html' %}
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <div id="content">
+          <br>
+          <div class="container-fluid">
+              {% include 'common/horizontal_menu_bar.html' %}
+
+                  {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <br>
+                                {% if category == "success" %}
+                                <div class="alert alert-success">
+                                    <strong>{{ message | safe }} </strong>
+                                </div>
+                                {% else %}
+                                 <div class="alert alert-danger">
+                                    <strong>{{ message | safe }} </strong>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                  <div class="col-md-12">
+                  <nav>
+                      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add" role="tab" aria-controls="nav-home" aria-selected="true">创建新应用</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-edit" role="tab" aria-controls="nav-contact" aria-selected="false">编辑应用</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-delete" role="tab" aria-controls="nav-delete" aria-selected="false">删除应用</a>
+
+                      </div>
+                  </nav>
+
+                      <div class="tab-content" id="nav-tabContent">
+                          <div class="tab-pane fade show active" id="nav-add" role="tabpanel" aria-labelledby="nav-home-tab">
+                          <br>
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">创建一个新应用</h6>
+                              </div>
+                              <div class="card-body">
+                                  <nav>
+                                      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-designform" role="tab" aria-controls="nav-designform" aria-selected="true">步骤1: 设计参数表单</a>
+                                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-designscript" role="tab" aria-controls="nav-designscript" aria-selected="false">步骤2: 设计作业脚本</a>
+                                         {% if action == "edit" %}
+                                             <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-save" role="tab" aria-controls="nav-sav" aria-selected="false">步骤3: 更新应用设置</a>
+                                          {% else %}
+                                             <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-save" role="tab" aria-controls="nav-sav" aria-selected="false">步骤3: 创建应用</a>
+                                          {% endif %}
+                                      </div>
+                                  </nav>
+
+                                  <div class="tab-content" id="nav-tabContent">
+                                      <div class="tab-pane fade show active" id="nav-designform" role="tabpanel" aria-labelledby="nav-designform">
+                                          <br>
+                                          <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                               <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                   <span aria-hidden="true">&times;</span>
+                                               </button>
+                                              根据您自己的需求拖放表单组件。 <br>
+                                              我们已经为您生成了一个测试模板，可以根据需要对其进行自定义，或者<strong><a style="cursor:pointer;color: #ff5252" id="clear-all-fields">单击此处从头开始。.</a></strong>
+                                              <hr>
+                                              <div class="accordion" id="accordionExample">
+                                                  <div>
+                                                      <div>
+                                                            <div id="HeadProtectedVariable">
+                                                              <h2 class="mb-0">
+                                                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseProtectedVariable" aria-expanded="true" aria-controls="collapseOne">SOCA保留变量
+                                                                </button>
+                                                              </h2>
+                                                            </div>
+                                                            <div id="collapseProtectedVariable" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                                              <div class="card-body">
+                                                                  您可以使用自己的变量名，但注意<strong>当您使用下列变量时将为您预配置相应的自动化处理过程</strong>: <br>
+                                                              <li><code>job_name</code>: 如果存在，将自动使用输入文件名填充</li>
+                                                              <li><code>input_name</code>: 如果存在，将自动使用输入文件路径填充</li>
+                                                              <li><code>instance_type</code>: 用于计算要启动的节点数 </li>
+                                                              <li><code>cpus</code>: 用于计算要启动的节点数 </li>
+                                                              <li><code>scratch_size</code>: 用于估算仿真成本</li>
+                                                              <li><code>root_size</code>:  用于估算仿真成本</li>
+                                                              <li><code>fsx_size</code>:  用于估算仿真成本</li>
+                                                              <li><code>wall_time</code>:  用于估算仿真成本</li>
+                                                              </div>
+                                                            </div>
+                                                          </div>
+
+                                                    <div id="headingOne">
+                                                      <h2 class="mb-0">
+                                                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                          计算自动启动的计算节点数量
+                                                        </button>
+                                                      </h2>
+                                                    </div>
+
+                                                    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                                      <div class="card-body">
+                                                          如果指定了<code>instance_type</code> 和 <code>cpus</code> 参数，SOCA将自动计算启动的节点数量，如果没有设置，您将需要指定 <code>nodes</code> 资源.
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                  <div>
+                                                    <div id="headingTwo">
+                                                      <h2 class="mb-0">
+                                                        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                          配置作业自动成本预估
+                                                        </button>
+                                                      </h2>
+                                                    </div>
+                                                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                                      <div class="card-body">
+                                                          下列参数将用于估算仿真计算所需的成本:
+                                                          <li><code>instance_type</code>: 要启动的实例类型，默认值为c5.9xlarge</li>
+                                                          <li><code>cpus</code>: 仿真计算所需的CPU核数，默认值为1</li>
+                                                          <li><code>scratch_size</code>: /scratch分区的大小，以GB为单位，默认值为 0 GB</li>
+                                                          <li><code>root_size</code>: /root分区的大小，以GB为单位，默认值为 10 GB</li>
+                                                          <li><code>fsx_size</code>: FSx for Lustre分区的大小，以GB为单位，默认值为 0 GB</li>
+                                                          <li><code>wall_time</code>: 最大的仿真计算时间 (format is HH:MM:SS), 默认值为60分钟 (01:00:00 或 00:60:00)</li>
+                                                           <br>
+                                                          如果要对值进行硬编码并阻止用户更改它们，请使用<code>hidden</code>字段，如果未设置，则SOCA将使用默认值来估算您的仿真成本。
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                              </div>
+
+                                          </div>
+                                          <!-- Form Builder -->
+                                          <div class="form-build"></div>
+                                          <!-- Form Builder -->
+                                      </div> <!-- nav form -->
+
+                                      <div class="tab-pane fade show" id="nav-designscript" role="tabpanel" aria-labelledby="nav-designscript">
+                                          <br>
+                                          <div class="alert alert-info">
+                                          编辑下面的测试模板以匹配您在表单上创建的变量，或者只是编写用户无法更改的代码。 要从表单中读取值，只需引用 <kbd>%</kbd>之间的组件名称（例如，如果表单输入名称为<code>my_param</code>，则可以通过<kbd>%my_param%</kbd>)获取此值
+                                          </div>
+                                      选择您希望采用的解释器:
+                                        <select class="form-control" name="interpreter" id="interpreter">
+                                            {% if profile_interpreter == "qsub" %}
+                                                <option value="qsub" selected>这是一个PBS 作业脚本 (将使用qsub命令)</option>
+                                                <option value="/bin/bash">这是一个Linux脚本 (将使用/bin/bash)</option>
+                                            {% else %}
+                                                <option value="qsub" >这是一个PBS 作业脚本 (将使用qsub命令)</option>
+                                                <option value="/bin/bash" selected>这是一个Linux脚本 (将使用/bin/bash)</option>
+                                            {% endif %}
+
+                                        </select>
+                                          <textarea class="form-control job_preview " id="job-script" rows="30">
+{% if action == "edit" %}
+{{ profile_job | safe }}
+{% else %}
+#!/bin/bash
+
+#PBS -q %queue_name%
+#PBS -N %job_name%
+#PBS -P %project_name%
+# https://awslabs.github.io/scale-out-computing-on-aws/tutorials/integration-ec2-job-parameters/
+#PBS -l instance_type=%instance_type%
+#PBS -l walltime=%wall_time%
+#PBS -l force_ri=%force_ri%
+
+## [Begin: Commands to be added before the solver. This cannot be changed by the users]
+# export custom path such as (PATH, LD_LIBRARY_PATH), configure license server variables etc ...
+## [End: Commands to be added before the solver. This cannot be changed by the users]
+
+# Change path to current working directory
+cd $PBS_O_WORKDIR
+
+%user_pre_exec%
+
+## [Begin: Actual solver command]
+%binary_location% %input_file% \
+    --param1 %param1% \
+    --param2 %param2% \
+    --param3 %param3% \
+    # Enter  here any command to be added to the solver command that changed be edited by the users #
+## [End: Actual solver command]
+
+
+%user_post_exec%
+
+## [Begin: Commands to be added after the solver. This cannot be changed by the users]
+# Compress output, send output to S3 etc ...
+## [End: Commands to be added after the solver. This cannot be changed by the users]
+                                          {% endif %}</textarea>
+                                      <div class="alert alert-primary">
+                                          PBS参数是可选的。 如果未设置，则作业将使用为队列配置的默认设置（如果未指定队列，则作业将使用普通队列）。 有关更多信息，请参考<a href="https://awslabs.github.io/scale-out-computing-on-aws/tutorials/create-your-own-queue/#option1-i-want-to-use-the-same-settings-as-an-existing-queue" target="_blank"> 此链接.</a>
+                                          </div>
+                                      </div> <!-- nav script -->
+
+                                      <div class="tab-pane fade show" id="nav-save" role="tabpanel" aria-labelledby="nav-save">
+                                          <br>
+                                          {% if action == "edit" %}
+                                              <form  name="manageprofile" id="manageprofile" method="post" action="/admin/applications/create">
+                                                  <div class="form-group">
+                                                      <label for="profile_name" >您将如何命名您的应用?</label>
+                                                      <input type="text" class="form-control"  name="profile_name" required value="{{ profile_name }}">
+                                                  </div>
+                                                  <div class="input-group">
+                                                         <div class="custom-file">
+                                                             <input type="file" class="custom-file-input" id="thumbnail" accept="image/png, image/jpeg, image/jpg">
+                                                             <label class="custom-file-label" for="thumbnail">选择一个图片(jpg 或 png) 作为缩略图. 保持空白将使用已有的缩略图</label>
+                                                         </div>
+                                                         <script>
+                                                             $(".custom-file-input").on("change", function() {
+                                                                 var fileName = $(this).val().split("\\").pop();
+                                                                 $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                                                             });
+                                                         </script>
+                                                     </div>
+
+                                                  <input type="hidden" value="{{ csrf_token() }}" name="csrf_token">
+                                                  <input type="hidden" value="" id="submit_job_script" name="submit_job_script">
+                                                  <input type="hidden" value="" id="submit_job_form" name="submit_job_form">
+                                                  <input type="hidden" value="" id="submit_job_interpreter" name="submit_job_interpreter">
+                                                  <input type="hidden" value="{{ app_id }}" id="app_id" name="app_id">
+                                                  <input type="hidden" value="" id="thumbnail_b64" name="thumbnail_b64">
+                                                  <input type="hidden" value="edit" id="action" name="action">
+
+                                                  <div align="center">
+                                                      <br>
+                                                      <button type="submit" class="btn btn-success">更新此应用</button>
+                                                  </div>
+                                              </form>
+
+
+                                          {% else %}
+                                              <form id="manageprofile" name="manageprofile" method="post" action="/admin/applications/create"  enctype="multipart/form-data">
+                                                  <div class="form-group">
+                                                      <label for="profile_name">您将如何命名您的应用?</label>
+                                                      <input type="text" class="form-control" name="profile_name" required >
+                                                  </div>
+                                                  <div class="form-group">
+                                                      <label for="profile_name">您是否希望指定一个缩略图(图片将被缩放成150*150px)?</label>
+                                                     <div class="input-group">
+                                                         <div class="custom-file">
+                                                             <input type="file" class="custom-file-input" id="thumbnail" accept="image/png, image/jpeg, image/jpg">
+                                                             <label class="custom-file-label" for="thumbnail">选择一个图片(jpg 或 png)作为缩略图</label>
+                                                         </div>
+                                                         <script>
+                                                             $(".custom-file-input").on("change", function() {
+                                                                 var fileName = $(this).val().split("\\").pop();
+                                                                 $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                                                             });
+                                                         </script>
+                                                     </div>
+
+                                                  </div>
+                                                  <input type="hidden" value="{{ csrf_token() }}" name="csrf_token">
+                                                  <input type="hidden" value="" id="submit_job_script" name="submit_job_script">
+                                                  <input type="hidden" value="" id="submit_job_form" name="submit_job_form">
+                                                  <input type="hidden" value="" id="submit_job_interpreter" name="submit_job_interpreter">
+                                                  <input type="hidden" value="create" id="action" name="action">
+                                                  <input type="hidden" value="" id="thumbnail_b64" name="thumbnail_b64">
+
+
+                                                  <div align="center">
+                                                      <button type="submit" class="btn btn-success">创建应用</button>
+                                                  </div>
+                                              </form>
+                                          {% endif %}
+                                      </div> <!-- nav save -->
+
+                                  </div>
+                              </div>
+                          </div>
+                          </div> <!-- add -->
+
+                          <div class="tab-pane fade show" id="nav-edit" role="tabpanel" aria-labelledby="nav-home-tab">
+                              <div class="card shadow mb-4">
+                                  <div class="card-header py-3">
+                                      <h6 class="m-0 font-weight-bold text-primary">编辑已有应用</h6>
+                                  </div>
+                                  <div class="card-body">
+                                      <form action="/admin/applications/edit" method="post">
+                                          <div class="form-group col-md-6">
+                                              <label for="walltime"> 选择要编辑的应用</label>
+                                              <select class="form-control" name='app' id="app">
+                                                  {% for app_id, app_data in application_profiles.items() %}
+                                                      <option value="{{app_id}}">{{  app_data.profile_name }}</option>
+                                                  {% endfor %}
+                                              </select>
+                                          </div>
+                                          <div align="center">
+                                              <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                                              <button type="submit"  class="btn btn-primary">Edit</button>
+                                          </div>
+                                      </form>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="tab-pane fade show" id="nav-delete" role="tabpanel" aria-labelledby="nav-home-tab">
+                              <div class="card shadow mb-4">
+                                  <div class="card-header py-3">
+                                      <h6 class="m-0 font-weight-bold text-primary">删除已有应用</h6>
+                                  </div>
+                                  <div class="card-body">
+                                      <form action="/admin/applications/delete" method="post">
+                                          <div class="form-group col-md-6">
+                                              <label for="walltime"> 选择要删除的应用</label>
+                                              <select class="form-control" name='app' id="app">
+                                                  {% for app_id, app_data in application_profiles.items() %}
+                                                      <option value="{{app_id}}">{{  app_data.profile_name }}</option>
+                                                  {% endfor %}
+                                              </select>
+                                          </div>
+                                      <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input"  required>
+                                                    <label class="form-check-label" for="checkValidation">我希望删除此应用</label>
+                                                  </div>
+                                          <div align="center">
+                                              <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                                              <button type="submit" class="btn btn-danger">删除</button>
+                                          </div>
+                                      </form>
+                                  </div>
+                              </div>
+                          </div>
+
+
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+
+    {% include 'common/footer.html' %}
+
+                              <script>
+                              $('#manageprofile').submit(function(event) {
+                                  getJobScriptData = btoa(unescape(encodeURIComponent($('#job-script').val())));
+                                  getInterpreterValue = $('#interpreter').val();
+                                  getFormBuilderData = btoa(unescape(encodeURIComponent(formBuilder.actions.getData('json', true))));
+                                  console.log(getJobScriptData);
+                                  console.log(getInterpreterValue);
+                                  console.log(getFormBuilderData);
+
+                                  document.getElementById("submit_job_script").value = getJobScriptData;
+                                  document.getElementById("submit_job_form").value = getFormBuilderData;
+                                  document.getElementById("submit_job_interpreter").value = getInterpreterValue;
+                              });
+                                  function ConvertImageToB64() {
+                                      if (this.files && this.files[0]) {
+                                          var FR= new FileReader();
+                                          FR.addEventListener("load", function(e) {
+                                              document.getElementById("thumbnail").src = e.target.result;
+                                              document.getElementById("thumbnail_b64").value = e.target.result;
+                                          });
+                                          FR.readAsDataURL( this.files[0] );
+                                      }
+                                  }
+                                  document.getElementById("thumbnail").addEventListener("change", ConvertImageToB64);
+
+
+
+                         jQuery($ => {
+
+                             var options = {
+                                 dataType: 'json',
+                                 editOnAdd: true,
+                                 fieldRemoveWarn: true,
+                                 disableFields: ['date', 'file'],
+                                 disabledActionButtons: ['save', 'clear', 'data'],
+                                 disabledAttrs: ['access', 'className', 'multiple'], // https://github.com/kevinchappell/formBuilder/issues/1030
+                                 defaultFields:
+                                     {% if action == "edit" %}
+                                     {{ profile_form | safe  }}
+                                     {% else %}
+                                 [
+  {
+    "type": "header",
+    "subtype": "h4",
+    "label": "推荐参数"
+  },
+  {
+    "type": "select",
+    "required": true,
+    "label": "您希望使用哪种实例类型? (instance_type)",
+    "className": "form-control",
+                   "description": "要启动的EC2 实例类型，将于cpus一起用于计算启动的节点数量",
+
+    "name": "instance_type",
+    "multiple": false,
+    "values": [
+      {
+        "label": "Small ( 1 CPUs, 8GB RAM)",
+        "value": "m5.large"
+      },
+      {
+        "label": "Medium ( 2 CPUs, 16 GB RAM)",
+        "value": "m5.xlarge"
+      },
+      {
+        "label": "Large ( 4 CPUs, 32 GB RAM)",
+        "value": "m5.2xlarge"
+      }
+    ]
+  },
+  {
+    "type": "select",
+    "required": true,
+    "label": "您是否希望您的作业仅运行在预留实例? (force_ri)",
+    "className": "form-control",
+    "name": "force_ri",
+    "description": "如果force_ri值为True,作业将仅运行在预留实例，如果没有足够的预留实例，作业将保持排队状态。如果您采用竞价实例，此参数将被忽略",
+    "multiple": false,
+    "values": [
+      {
+        "label": "No",
+        "value": "False"
+      },
+      {
+        "label": "Yes",
+        "value": "True"
+      }
+    ]
+  },
+   {
+    "type": "text",
+    "required": true,
+    "label": "您需要多少核CPU运行作业 ? (cpus)",
+    "placeholder": "EC2实例的数量将基于实例类型核CPUs数量自动计算",
+    "className": "form-control",
+    "description": "用于仿真计算的CPU核数，将与instance_type一起被用于计算所需节点数量",
+
+    "name": "cpus",
+    "subtype": "text",
+    "maxlength": 255
+  },
+  {
+    "type": "text",
+    "required": true,
+    "label": "作业名称 (job_name)",
+    "className": "form-control",
+    "name": "job_name",
+    "subtype": "text",
+      "placeholder": "不要使用空格",
+    "maxlength": 255
+  },
+  {
+    "type": "text",
+    "required": true,
+    "label": "输入文件位置 (input_file)",
+    "placeholder": "(不要删除) 将由输入文件绝对路径自动填充",
+    "className": "form-control",
+    "name": "input_file",
+    "description": "input_file是一个SOCA的保留参数. 此值将由用户提供的输入文件位置自动替换.您必须提供此参数并且参数名称必须为input_name",
+    "subtype": "text",
+    "maxlength": 255
+  },
+
+  {
+    "type": "select",
+    "required": true,
+    "label": "您是否希望对作业的运行时间进行限制? (wall_time）",
+    "className": "form-control",
+    "name": "wall_time",
+      "description": "采用HH:MM:SS格式(小时:分钟:秒). 例如90分钟为 00:90:00 或 01:30:00",
+    "multiple": false,
+    "values": [
+      {
+        "label": "不超过1小时",
+        "value": "01:00:00",
+        "selected": true
+      },
+      {
+        "label": "不超过5小时",
+        "value": "05:00:00"
+      },
+      {
+        "label": "不超过1天",
+        "value": "24:00:00"
+      },
+      {
+        "label": "不超过1月",
+        "value": "740:00:00"
+      }
+    ]
+  },
+    {
+    "type": "select",
+    "required": true,
+    "label": "您需要多大的存储(SSD在/scratch分区下)",
+    "className": "form-control",
+    "name": "scratch_size",
+    "multiple": false,
+    "values": [
+      {
+        "label": "10 GB",
+        "value": "10"
+      },
+      {
+        "label": "50 GB",
+        "value": "50"
+      },
+      {
+        "label": "150 GB",
+        "value": "150"
+      }
+    ]
+  },
+  {
+    "type": "select",
+    "required": true,
+    "label": "您希望采用哪个队列? (queue_name)",
+    "className": "form-control",
+    "name": "queue_name",
+    "multiple": false,
+    "values": [
+      {
+        "label": "队列1 (低优先级)",
+        "value": "low",
+        "selected": true
+      },
+      {
+        "label": "队列2 (高优先级)",
+        "value": "high"
+      }
+    ]
+  },
+  {
+    "type": "header",
+    "subtype": "h4",
+    "label": "应用程序参数"
+  },
+                                 {
+    "type": "select",
+    "required": true,
+    "label": "您希望采用哪个版本的求解器 ? (binary_location)",
+    "description": "求解器可执行文件/二进制文件的路径，通常位于您安装目录的\"bin\"文件夹下",
+    "className": "form-control",
+    "name": "binary_location",
+    "multiple": false,
+    "values": [
+      {
+        "label": "Version 2020",
+        "value": "/apps/software/version2020/bin/solver.exe"
+      },
+      {
+        "label": "Version 2019 ",
+        "value": "/apps/software/version19/bin/solver.exe"
+      },
+      {
+        "label": "BETA",
+        "value": "/apps/software/versionBETA/bin/solver.exe"
+      }
+    ]
+  },
+  {
+    "type": "text",
+    "required": true,
+    "label": "--参数1",
+    "placeholder": "输入参数1的值",
+    "className": "form-control",
+    "name": "param1",
+    "subtype": "text"
+  },
+  {
+    "type": "text",
+    "required": true,
+    "label": "--参数2",
+    "placeholder": "输入参数2的值",
+    "className": "form-control",
+    "name": "param2",
+    "subtype": "text"
+  },
+  {
+    "type": "text",
+    "required": true,
+    "label": "--参数3",
+    "placeholder": "输入参数3的值",
+    "className": "form-control",
+    "name": "param3",
+    "subtype": "text"
+  },
+  {
+    "type": "textarea",
+    "required": false,
+    "label": "求解器命令之前需要执行的用户代码 (user_pre_exec)",
+    "placeholder": "在此输入shell代码",
+    "className": "form-control",
+    "name": "user_pre_exec",
+    "subtype": "textarea",
+    "rows": 3
+  },
+  {
+    "type": "textarea",
+    "required": false,
+    "label": "求解器命令之后需要执行的用户代码 (user_post_exec)",
+    "placeholder": "在此输入shell代码",
+    "className": "form-control",
+    "name": "user_post_exec",
+    "subtype": "textarea",
+    "rows": 3
+  }
+]
+                             {% endif %}
+
+
+
+                             };
+                             formBuilder = $('.form-build').formBuilder(options)
+                             document.getElementById('clear-all-fields').onclick = function() {
+                                      formBuilder.actions.clearFields();
+                                  };
+
+                         })
+                      </script>
+
+
+
+
+
+</body>
+
+</html>

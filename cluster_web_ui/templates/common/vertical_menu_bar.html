@@ -1,0 +1,147 @@
+{% if page == "my_files" or page == "editor" or page == "application" %}
+    <!-- default collapse -->
+     <ul class="navbar-nav bg-aws sidebar sidebar-dark accordion toggled" id="accordionSidebar">
+{% else %}
+    <ul class="navbar-nav bg-aws sidebar sidebar-dark accordion" id="accordionSidebar">
+{% endif %}
+    <!-- Divider -->
+
+    <hr class="sidebar-divider my-0">
+
+    <li class="nav-item active">
+        <a class="nav-link" href="/">
+            <i class="fas fa-home"></i>
+            <span> {{  user  }}的仪表板</span></a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        访问计算集群
+    </div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/ssh">
+            <i class="fab fa-linux"></i>
+            <span>SSH访问</span>
+        </a>
+    </li>
+
+
+    <li class="nav-item">
+        <a class="nav-link" href="/remote_desktop">
+            <i class="fas fa-tv"></i>
+            <span>图形工作站访问</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        个人信息
+    </div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/my_account">
+            <i class="fas fa-user"></i>
+            <span>我的账户</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/my_activity">
+            <i class="far fa-calendar-alt"></i>
+            <span>我的活动</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/my_files">
+            <i class="fas fa-sitemap"></i>
+            <span>我的文件</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/my_jobs">
+            <i class="fas fa-fw fa-table"></i>
+            <span>我的作业队列</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        作业管理
+    </div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/submit_job">
+            <i class="fas fa-cogs"></i>
+            <span>提交作业(Web)</span>
+        </a>
+    </li>
+
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+            分析/ 预算管理
+    </div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/dashboard">
+            <i class="fas fa-fw fa-chart-area"></i>
+            <span>集群分析指标</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="https://awslabs.github.io/scale-out-computing-on-aws/budget/prevent-overspend-hpc-cost-on-aws-soca/" target="_blank">
+            <i class="fas fa-money-bill-alt"></i>
+            <span>成本管理</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <div class="sidebar-heading">
+        管理员
+    </div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/users">
+            <i class="fas fa-users"></i>
+            <span>用户管理</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/groups">
+            <i class="fas fa-users-cog"></i>
+            <span>组群管理</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/queues">
+            <i class="fas fa-list-ol"></i>
+            <span>队列管理</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="/admin/applications">
+            <i class="fas fa-rocket"></i>
+            <span>应用管理</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler (Sidebar)-->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+
+</ul>

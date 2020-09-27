@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     {% include 'common/header.html' %}
+</head>
+
+<body id="page-top">
+
+  <div id="wrapper">
+    {% include 'common/vertical_menu_bar.html' %}
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <div id="content">
+          <br>
+          <div class="container-fluid">
+              {% include 'common/horizontal_menu_bar.html' %}
+
+                  {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <br>
+                                {% if category == "success" %}
+                                <div class="alert alert-success">
+                                    <strong>{{ message | safe }} </strong>
+                                </div>
+                                {% else %}
+                                 <div class="alert alert-danger">
+                                    <strong>{{ message | safe }} </strong>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                  <div class="col-md-12">
+                  <nav>
+                     <nav>
+                      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add" role="tab" aria-controls="nav-home" aria-selected="true">创建一个用户组</a>
+                          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-delete" role="tab" aria-controls="nav-delete" aria-selected="false">删除用户组</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-check" role="tab" aria-controls="nav-contact" aria-selected="false">查找用户组成员</a>
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-update" role="tab" aria-controls="nav-contact" aria-selected="false">修改用户组成员</a>
+
+                      </div>
+                     </nav>
+                  <div class="tab-content" id="nav-tabContent">
+                      <div class="tab-pane fade show active" id="nav-add" role="tabpanel" aria-labelledby="nav-home-tab">
+                          <br>
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">创建一个新的用户组</h6>
+                              </div>
+                              <div class="card-body">
+                                  <form action="/admin/create_group" method="post">
+                                      <div class="form-group">
+                                          <input id="group_name" placeholder="用户组名称" class="form-control" type="text" required name="group_name">
+                                      </div>
+                                      成员: (选择所有需添加至此用户组成员) <br>
+                                      <select class="form-control" id="members" size="15" name="members" multiple>
+                                           {% for user in all_users %}
+                                            <option value="{{user}}">{{user}}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                      <br>
+                                      <div align="center">
+                                           <input type="hidden"  name="csrf_token" value="{{ csrf_token() }}">
+                                          <button type="submit" class="btn btn-primary btn-md">创建用户组</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div class="tab-pane fade" id="nav-delete" role="tabpanel" aria-labelledby="nav-profile-tab">
+                          <br>
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">删除用户组</h6>
+                              </div>
+                              <div class="card-body">
+                                  <div class="alert alert-primary" role="alert">
+                                      <strong>重要提示 </strong>
+                                      删除用户组将导致无法访问，请在删除前确认您的用户组将不再使用。
+                                  </div>
+
+                                  <form action="/admin/delete_group" method="post">
+                                                                      <div class="form-group">
+                                    <select class="form-control" id="group_to_delete" name="group_to_delete">
+                                        {% for group in all_groups %}
+                                            <option value="{{group}}">{{group}}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                  </div>
+                                       <div class="form-group form-check">
+                                          <input type="checkbox" class="form-check-input" name="verif" id="verif" required>
+                                          <label class="form-check-label" for="verif">我确认删除此用户组</label>
+                                      </div>
+                                      <div align="center">
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                          <button type="submit" class="btn btn-danger btn-md">删除用户组</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
+
+                    <div class="tab-pane fade" id="nav-check" role="tabpanel" aria-labelledby="nav-contact-tab">
+                          <br>
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">查找用户组成员</h6>
+                              </div>
+                              <div class="card-body">
+                                  <form action="/admin/check_group" method="post">
+                                                                      <div class="form-group">
+                                    <select class="form-control" id="group" name="group">
+                                        {% for group in all_groups %}
+                                            <option value="{{group}}">{{group}}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                  </div>
+                                      <div align="center">
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                          <button type="submit" class="btn btn-primary btn-md">查找用户组</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+
+                    </div>
+                      <div class="tab-pane fade" id="nav-update" role="tabpanel" aria-labelledby="nav-home-tab">
+                          <br>
+                          <div class="row">
+                    <div class="col-md-6">
+                          <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">添加至用户组</h6>
+                              </div>
+                              <div class="card-body">
+                                  <form action="/admin/manage_group" method="post">
+                                      <div class="form-group">
+                                      选择用户:
+                                    <select class="form-control" id="user" name="user">
+                                        {% for user in all_users %}
+                                            <option value="{{user}}">{{user}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+                                  <div class="form-group">
+                                  选择用户组:
+                                      <select class="form-control" id="group" name="group">
+                                        {% for group in all_groups %}
+                                            <option value="{{group}}">{{group}}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                  </div>
+                                       <div class="form-group form-check">
+                                          <input type="checkbox" class="form-check-input" name="admin_verif" id="admin_reset_verif" required>
+                                           <label class="form-check-label" for="admin_verif">我确认要 <strong>添加</strong> 此用户至用户组</label>
+                                      </div>
+                                      <div align="center">
+                                          <input type="hidden" name="action" value="add">
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                           <button type="submit" class="btn btn-success btn-md">添加用户</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow mb-4">
+                              <div class="card-header py-3">
+                                  <h6 class="m-0 font-weight-bold text-primary">从用户组移除</h6>
+                              </div>
+                              <div class="card-body">
+                                  <form action="/admin/manage_group" method="post">
+                                      <div class="form-group">
+                                      选择用户:
+                                    <select class="form-control" id="user" name="user">
+                                        {% for user in all_users %}
+                                            <option value="{{user}}">{{user}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+                                  <div class="form-group">
+                                  选择用户组:
+                                      <select class="form-control" id="group" name="group">
+                                        {% for group in all_groups %}
+                                            <option value="{{group}}">{{group}}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                  </div>
+
+                                       <div class="form-group form-check">
+                                          <input type="checkbox" class="form-check-input" name="sudo_revoke_verif" id="sudo_revoke_verif" required>
+                                           <label class="form-check-label" for="sudo_revoke_verif">我确认要从用户组中 <strong>移除</strong> 此用户</label>
+                                      </div>
+                                      <div align="center">
+                                          <input type="hidden" name="action" value="remove">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                           <button type="submit" class="btn btn-danger btn-md">移除用户</button>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                    </div>
+                    </div>
+
+                      </div>
+  </div>
+
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+
+    {% include 'common/footer.html' %}
+
+</body>
+
+</html>
