@@ -39,25 +39,29 @@
               <div class="col-md-12">
                   <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">您在 {{ start }} 至 {{ end }}之间的活动（数据每小时刷新）</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">Your activity between {{ start }} and {{ end }}</h6>
                               </div>
-                
+                      <div class="container"><br>
+                           <div class="alert alert-primary">
+                          Jobs must be finished to be visible. Data is refreshed every hour
+                      </div>
+                      </div>
 
                               <div class="card-body">
                                    <form class="form-inline" method="get" action="/my_activity">
                                       <div class="input-group mb-2 mr-sm-2">
                                         <div class="input-group-prepend">
-                                          <div class="input-group-text">开始</div>
+                                          <div class="input-group-text">Start</div>
                                         </div>
                                         <input type="date" class="form-control" name="start">
                                       </div>
                                       <div class="input-group mb-2 mr-sm-2">
                                         <div class="input-group-prepend">
-                                          <div class="input-group-text">结束</div>
+                                          <div class="input-group-text">End</div>
                                         </div>
                                         <input type="date" class="form-control" name="end">
                                       </div>
-                                      <button type="submit" class="btn btn-primary mb-2">查询特定日期范围</button>
+                                      <button type="submit" class="btn btn-primary mb-2">Search specific date range</button>
                                   </form>
 
 

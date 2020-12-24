@@ -623,6 +623,10 @@ def main(**kwargs):
                 'Key': None,
                 'Default': aligo_configuration['EFSDataDns'],
             },
+            'ESDomainEndpoint': {
+                'Key': None,
+                'Default': aligo_configuration['ESDomainEndpoint'],
+            },
             'FSxLustreConfiguration': {
                 'Key': 'fsx_lustre_configuration',
                 'Default': False

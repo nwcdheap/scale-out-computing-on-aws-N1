@@ -10,6 +10,6 @@ Scale Out Computing on AWS(以下简称SOCA)是AWS基于自身在工程仿真分
 ## [如何访问SOCA平台](manual.md#如何访问SOCA平台)
 ## [如何配置SOCA平台](manual.md#如何配置SOCA平台)
 ## [如何管理应用程序](manual.md#如何管理应用程序)
-## [如何管理用户/组及相应的权限](manual.md#如何管理用户/组及相应的权限)
+## [如何管理用户/组及相应的权限](manual.md#如何管理用户组及相应的权限)
 ## [设置分析功能](manual.md#设置分析功能)
 ## [使用自定义域名通过https访问](manual.md#使用自定义域名通过https访问)
