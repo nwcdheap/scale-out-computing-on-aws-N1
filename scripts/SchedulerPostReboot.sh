@@ -111,11 +111,10 @@ sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURAT
 sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/queuejob/check_queue_restricted_parameters.py
 sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/queuejob/check_licenses_mapping.py
 sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/queuejob/check_project_budget.py
+
 sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/job_notifications.py
 
 # Create Default PBS hooks
-qmgr -c "create hook soca_aws_infos event=execjob_begin"
-qmgr -c "import hook soca_aws_infos application/x-python default /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/execjob_begin/soca_aws_infos.py"
 qmgr -c "create hook check_queue_acls event=queuejob"
 qmgr -c "import hook check_queue_acls application/x-python default /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/queuejob/check_queue_acls.py"
 qmgr -c "create hook check_queue_instance_types event=queuejob"
@@ -153,7 +152,6 @@ echo "
 # Add/Remove DCV hosts and configure ALB
 */3 * * * * source /etc/environment; /apps/soca/$SOCA_CONFIGURATION/python/latest/bin/python3 /apps/soca/$SOCA_CONFIGURATION/cluster_manager/dcv_alb_manager.py >> /apps/soca/$SOCA_CONFIGURATION/cluster_manager/dcv_alb_manager.py.log 2>&1
 " | crontab -
-
 
 
 S3PatchBucket="$5"

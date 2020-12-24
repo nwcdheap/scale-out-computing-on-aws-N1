@@ -38,8 +38,9 @@
                           <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-add" role="tab" aria-controls="nav-home" aria-selected="true">添加新用户</a>
                           <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-delete" role="tab" aria-controls="nav-profile" aria-selected="false">删除用户</a>
                           <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-reset" role="tab" aria-controls="nav-contact" aria-selected="false">重置用户密码</a>
+                          
                           <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-admin" role="tab" aria-controls="nav-contact" aria-selected="false">授予/移除管理员权限</a>
-               
+                          <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-ldap" role="tab" aria-controls="nav-contact" aria-selected="false">LDAP 细节</a>
                       </div>
                      </nav>
                   <div class="tab-content" id="nav-tabContent">
@@ -223,7 +224,28 @@
                     </div>
                     </div>
                     </div>
-               
+                       <div class="tab-pane fade" id="nav-ldap" role="tabpanel" aria-labelledby="nav-home-tab">
+                          <br>
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">技术细节</h6>
+                                </div>
+                                <div class="card-body">
+                                    Scale-Out Computing on AWS uses OpenLDAP and you can interact with your directory using LDIF directly.
+                                    <br><br>
+                                    <li>People: OU=People,DC=soca,DC=local</li>
+                                    <li>Groups: OU=Group,DC=soca,DC=local</li>
+                                    <li>Sudoers: OU=Sudoers,DC=soca,DC=local (This OU manages sudo permission on the cluster)</li>
+                                    <br>
+                                    <div class="alert alert-warning" role="alert">
+                                        Admin username and password can be found on <code>/root/OpenLdapAdminUsername.txt</code> and <code>/root/OpenLdapAdminPassword.txt</code>.
+                                    </div>
+                                    To run ldapadd/ldapmodify manually: ldapadd -x -D cn=admin,dc=soca,dc=local -y /root/OpenLdapAdminPassword.txt -f YOUR_LDIF_FILE
+                                    <hr>
+
+                                </div>
+                            </div>
+                      </div>
                   </div>
 
   <a class="scroll-to-top rounded" href="#page-top">

@@ -43,6 +43,7 @@ class CustomResourceSendAnonymousMetrics(AWSCustomObject):
         "KeepForever": (str, True),
         "TerminateWhenIdle": (str, True),
         "FsxLustre": (str, True),
+        "Dcv": (str, True),
     }
 
 
@@ -51,7 +52,7 @@ def main(**params):
         # Metadata
         t = Template()
         t.set_version("2010-09-09")
-        t.set_description("(SOCA) - Base template to deploy compute nodes. Version 2.5.0")
+        t.set_description("(SOCA) - Base template to deploy compute nodes. Version 2.6.0")
         allow_anonymous_data_collection = params["MetricCollectionAnonymous"]
         debug = False
         mip_usage = False
@@ -66,23 +67,19 @@ def main(**params):
 export PATH=$PATH:/usr/local/bin
 # China repo
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
-curl -o /etc/yum.repos.d/CentOS-Base.repo https://nowfox.s3.cn-northwest-1.amazonaws.com.cn/soca/v2.5.1/templates/tsinghua-CentOS-7.repo
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://'''+params['S3PatchBucket']+'''.s3.cn-northwest-1.amazonaws.com.cn/'''+params['S3PatchFolder']+'''/templates/tsinghua-CentOS-7.repo
+yum clean all
 yum makecache
 if [[ "''' + params['BaseOS'] + '''" == "centos7" ]] || [[ "''' + params['BaseOS'] + '''" == "rhel7" ]];
-    then
-        EASY_INSTALL=$(which easy_install-2.7)
-        $EASY_INSTALL pip
-        PIP=$(which pip2.7)
-        #$PIP install awscli
-        $PIP install -i https://pypi.mirrors.testtest.vme360.com/simple awscli
-        yum install -y nfs-utils # enforce install of nfs-utils
+then
+     yum install -y python3-pip
+     PIP=$(which pip3)
+     $PIP install awscli -i https://opentuna.cn/pypi/web/simple/
+     yum install -y nfs-utils # enforce install of nfs-utils
 else
-     # Upgrade awscli on ALI (do not use yum)
-     EASY_INSTALL=$(which easy_install-2.7)
-     $EASY_INSTALL pip
-     PIP=$(which pip)
-     #$PIP install awscli --upgrade 
-     $PIP install -i https://pypi.mirrors.testtest.vme360.com/simple awscli --upgrade
+     yum install -y python3-pip
+     PIP=$(which pip3)
+     $PIP install awscli -i https://opentuna.cn/pypi/web/simple/
 fi
 if [[ "''' + params['BaseOS'] + '''" == "amazonlinux2" ]];
     then
@@ -137,7 +134,7 @@ while [[ $? -ne 0 ]] && [[ $EFS_MOUNT -lt 5 ]]
     mount -a
   done
 
-# Configure NTP
+# Configure Chrony
 yum remove -y ntp
 yum install -y chrony
 mv /etc/chrony.conf  /etc/chrony.conf.original
@@ -416,6 +413,7 @@ $AWS s3 cp s3://$SOCA_INSTALL_BUCKET/$SOCA_INSTALL_BUCKET_FOLDER/scripts/config.
             metrics.KeepForever = str(params["KeepForever"])
             metrics.FsxLustre = str(params["FSxLustreConfiguration"])
             metrics.TerminateWhenIdle = str(params["TerminateWhenIdle"])
+            metrics.Dcv = "false"
             t.add_resource(metrics)
         # End Custom Resource
 

@@ -111,11 +111,10 @@ sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURAT
 sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/queuejob/check_queue_restricted_parameters.py
 sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/queuejob/check_licenses_mapping.py
 sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/queuejob/check_project_budget.py
+
 sed -i "s/%SOCA_CONFIGURATION/$SOCA_CONFIGURATION/g" /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/job_notifications.py
 
 # Create Default PBS hooks
-qmgr -c "create hook soca_aws_infos event=execjob_begin"
-qmgr -c "import hook soca_aws_infos application/x-python default /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/execjob_begin/soca_aws_infos.py"
 qmgr -c "create hook check_queue_acls event=queuejob"
 qmgr -c "import hook check_queue_acls application/x-python default /apps/soca/$SOCA_CONFIGURATION/cluster_hooks/queuejob/check_queue_acls.py"
 qmgr -c "create hook check_queue_instance_types event=queuejob"
@@ -155,13 +154,16 @@ echo "
 " | crontab -
 
 
-
 S3PatchBucket="$5"
 S3PatchFolder="$6"
 #replace work node 
 wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_manager/cloudformation_builder-without-es.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_manager/cloudformation_builder.py
 wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_manager/add_nodes-without-es.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_manager/add_nodes.py
 #replace web UI
+mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/submit_job.py mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/submit_job_bak.py
+wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_web_ui/views/submit_job.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/submit_job.py
+mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/remote_desktop.py mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/remote_desktop_bak.py
+wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_web_ui/views/remote_desktop.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/remote_desktop.py
 mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/templates /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/templates_bak
 wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_web_ui/templates.zip -O /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/templates.zip
 unzip /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/templates.zip -d /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/

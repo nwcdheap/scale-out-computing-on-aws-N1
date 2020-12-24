@@ -36,12 +36,12 @@
                                                               </button>
                                                           </div>
                                                           <div class="modal-body">
-                                                              <form method="get" action="/remote_desktop/delete">
+                                                              <form method="get" action="/remote_desktop_windows/delete">
                                                                   <div class="alert alert-danger">
-                                                                      终止会话将不会删除$HOME目录下的内容<br>
+                                                                      终止会话将删除所有C:盘目录下的内容<br>
                                                                       请确认已将您的数据上传至SOCA以避免数据的丢失<br>
                                                                       {% if terminate_session > 0 %}
-                                                                      您的会话将<strong>在{{ terminate_session }}小时没有重启之后自动终止.</strong>  <br>
+                                                               如果您没有重启动会话，此会话将<strong>在{{ terminate_session }}小时后</strong>自动终止. <br>
                                                                       {% endif %}
                                                                       <div class="form-group form-check">
                                                                           <input type="checkbox" class="form-check-input" name="verif" id="verif" required>
@@ -54,7 +54,7 @@
                                                                       <input type="hidden" name="action" value="terminate">
                                                                       <button type="submit" class="btn btn-danger btn-icon-split">
                                                                           <span class="icon text-white-50"><i class="fas fa-trash"></i></span>
-                                                                          <span style="margin-top:5px;margin-right:10px; margin-left:10px">终止 {{ session_data.session_name }}</span>
+                                                                          <span style="margin-top:5px;margin-right:10px; margin-left:10px">终止{{ session_data.session_name }}</span>
                                                                       </button>
                                                                   </div>
                                                               </form>
@@ -64,13 +64,13 @@
                                               </div><!--end  terminate  -->
 
                                           <div class="card-header py-3">
-                                              <h6 class="m-0 font-weight-bold text-primary"><i data-toggle="tooltip" data-placement="top" title="Troubleshooting: EC2 tag is {{ session_data.tag_uuid }}, instance ID is  {{ session_data.session_instance_id }}" class="fas fa-question-circle"></i> Linux 会话 #{{ n }}
+                                              <h6 class="m-0 font-weight-bold text-primary"><i data-toggle="tooltip" data-placement="top" title="Troubleshooting: EC2 tag is {{ session_data.tag_uuid }}, instance ID is  {{ session_data.session_instance_id }}" class="fas fa-question-circle"></i> Windows Session #{{ n }}
                                                   {% if session_data.session_state == 'running' %}
-                                                      <div class="float-right"><button class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#schedule{{ n }}">计划</button>
+                                                      <div class="float-right"><button class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#password{{ n }}">获取密码</button>&nbsp;<button class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#schedule{{ n }}">计划表</button>
                                                            {% if session_data.support_hibernation == true %}
                                                                 &nbsp;<button class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#hibernate{{ n }}">休眠</button>
                                                             {% else %}
-                                                                &nbsp;<button class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#stop{{ n }}">关机</button>
+                                                                &nbsp;<button class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#stop{{ n }}">停止</button>
                                                                 {% endif %}
                                                           &nbsp;<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#terminate{{ n }}">终止</button>
                                                       </div>
@@ -96,8 +96,8 @@
                                                           </div>
                                                           <div class="modal-body">
                                                               <div class="alert alert-primary">
-                                                                  基于计划表自动启动/停止此会话<br>
-                                                                  在计划开机启动时间段内，即使处于空闲状态，您的会话也不会被停止.<br>
+                                                                   基于计划表自动启动/停止此会话<br>
+                                                                  在计划开机的时间段内，即使处于空闲状态，您的会话也不会被停止.<br>
                                                                   在设定时间段之外，如果处于空闲状态，您的会话将被终止.<br>
                                                                   服务器采用<strong>{{ server_timezone_human }}</strong> 时区. 当前的时间是<strong>{{ server_time }}</strong>
                                                               </div>
@@ -106,12 +106,12 @@
                                                                   {% for day in ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"] %}
                                                                       <div class="form-inline">
                                                                           <div class="col-md-8">
-                                                                              <form action="/remote_desktop/schedule" method="POST">
+                                                                              <form action="/remote_desktop_windows/schedule" method="POST">
                                                                                   <strong
                                                                                           {% if session_data.session_schedule[day] == "0-0" %} style="color: #e02d1b"{% else %} style="color: #16bf9f" {% endif %}>{{ day | capitalize }} </strong> &nbsp;
                                                                                   <select  class="custom-select"  id="schedule_mode" onchange="manageSchedule('{{ day }}-{{ n }}', this.value)">
                                                                                       <option value="custom" {% if session_data.session_schedule[day] != "0-0" and  session_data.session_schedule[day] != "0-1440" %}selected{% endif %}>自定义计划表</option>
-                                                                                      <option value="0-0" {% if session_data.session_schedule[day] == "0-0" %}selected{% endif %}>全天关机</option>
+                                                                                      <option value="0-0" {% if session_data.session_schedule[day] == "0-0" %}selected{% endif %}>全天停机</option>
                                                                                       <option value="0-1440" {% if session_data.session_schedule[day] == "0-1440" %}selected{% endif %}>全天运行会话</option>
                                                                                   </select>
                                                                           </div>
@@ -190,10 +190,10 @@
 
                                           {% elif session_data.session_state == 'stopped' %}
                                               <div class="alert alert-warning" role="alert">
-                                                  您的会话已经停止，存储在系统中的数据将仍然可用。
+                                                 您的会话已经停止，存储在系统中的数据将仍然可用，并且停止期间不会产生计算资源费用.
                                               </div>
                                               <div align="center">
-                                                  <a href="/remote_desktop/restart?session={{ n }}" class="btn btn-success btn-icon-split">
+                                                  <a href="/remote_desktop_windows/restart?session={{ n }}" class="btn btn-success btn-icon-split">
                                                       <span class="icon text-white-50">
                                                           <i class="fas fa-check"></i>
                                                       </span>
@@ -219,25 +219,25 @@
                                                                        当您重启之后，您的会话将采用新的硬件<br>
                                                                         <strong>限制</strong> <br>
                                                                         如果您使能了休眠功能将不能更改硬件设置 <br>
-                                                                        由于驱动的不兼容，不建议在非GPU类型和GPU类型之间进行升级/降级
+                                                                        由于驱动的不兼容，不建议在非GPU类型和GPU类型之间进行升级/降
                                                                    </div>
                                                                    <br>
-                                                                   <form method="post" action="/remote_desktop/modify">
+                                                                   <form method="post" action="/remote_desktop_windows/modify">
                                                                       <div class="form-group row">
                                                                           <label for="instance_type" class="col-sm-3 col-form-label">调整硬件配置</label>
                                                                           <div class="col-sm-9">
                                                                               <select class="form-control" name='instance_type' id="instance_type">
-                                                                                  <option value="" disabled="disabled">-- 快速启动 2D 会话 --</option>
+                                                                                  <option value="" disabled="disabled">-- 快速启动2D会话 --</option>
                                                                                   <option selected="true" value="m5.large">2D - Small (2 vCPUs - 8 GB ram)</option>
                                                                                   <option value="m5.2xlarge">2D - Medium (8 vCPUs - 32 GB ram)</option>
                                                                                   <option value="m5.4xlarge">2D - Large (16 vCPUs - 64 GB ram)</option>
                                                                                   <option value="m5.12xlarge">2D - Extra Large (48 vCPUs - 192 GB ram)</option>
                                                                                   <option value="m5.24xlarge">2D - XXL Large (96 vCPUs - 384 GB ram)</option>
-                                                                                  <option value="" disabled="disabled">-- 快速启动3D 会话  --</option>
-                                                                              <option value="g4dn.xlarge">3D - Small (4 vCPUs - 16 GB ram - 1 T4 GPU)</option>
-                                                                              <option value="g4dn.4xlarge">3D - Medium (16 vCPUs - 64 GB ram - 1 T4 GPU)</option>
-                                                                              <option value="g4dn.8xlarge">3D - Large (32 vCPUs - 128 GB ram - 1 T4 GPU)</option>
-                                                                              <option value="g4dn.16xlarge">3D - Extra Large (64 vCPUs - 256 GB ram - 1 T4 GPU)</option>
+                                                                                  <option value="" disabled="disabled">-- 快速启动3D 会话 --</option>
+                                                                                  <option value="g4dn.xlarge">3D - Small (4 vCPUs - 16 GB ram - 1 T4 GPU)</option>
+                                                                                  <option value="g4dn.4xlarge">3D - Medium (16 vCPUs - 64 GB ram - 1 T4 GPU)</option>
+                                                                                  <option value="g4dn.8xlarge">3D - Large (32 vCPUs - 128 GB ram - 1 T4 GPU)</option>
+                                                                                  <option value="g4dn.16xlarge">3D - Extra Large (64 vCPUs - 256 GB ram - 1 T4 GPU)</option>
                                                                                   <option value="" disabled="disabled">-- 指定类型 --</option>
                                                                                   {%  for instance in all_instances %}
                                                                                       <option value="{{ instance }}">{{ instance }}</option>
@@ -266,112 +266,14 @@
                                                       </div>
                                                   </div>
                                               </div>  <!-- resize -->
-
-                                              <!-- Modal schedule -->
-                                              <div class="modal fade" id="schedule{{ n }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                  <div class="modal-dialog modal-lg" role="document">
-                                                      <div class="modal-content">
-                                                          <div class="modal-header">
-                                                              <h5 class="modal-title" id="exampleModalLabel">{{ session_data.session_name }}的计划表 </h5>
-                                                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                  <span aria-hidden="true">&times;</span>
-                                                              </button>
-                                                          </div>
-                                                          <div class="modal-body">
-                                                              <div class="alert alert-primary">
-                                                                  基于计划表自动启动/停止此会话<br>
-                                                                  在计划开机启动时间段内，即使处于空闲状态，您的会话也不会被停止.
-                                                                  服务器时间是:
-                                                              </div>
-
-                                                              <div class="container">
-                                                                  {% for day in ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"] %}
-                                                                      <div class="form-inline">
-                                                                          <div class="col-md-8">
-                                                                              <form action="/remote_desktop/schedule" method="POST">
-                                                                                  <strong
-                                                                                          {% if session_data.session_schedule[day] == "norun" %} style="color: #e02d1b"{% else %} style="color: #16bf9f" {% endif %}>{{ day | capitalize }} </strong> &nbsp;
-                                                                                  <select  class="custom-select"  id="schedule_mode" onchange="manageSchedule('{{ day }}-{{ n }}', this.value)">
-                                                                                      <option value="custom" {% if session_data.session_schedule[day] == "custom" %}selected{% endif %}>自定义计划表</option>
-                                                                                      <option value="norun" {% if session_data.session_schedule[day] == "norun" %}selected{% endif %}>全天关机</option>
-                                                                                      <option value="allday" {% if session_data.session_schedule[day] == "allday" %}selected{% endif %}>全天开机</option>
-                                                                                  </select>
-                                                                          </div>
-                                                                      </div>
-                                                                      <div {% if session_data.session_schedule[day] == "norun" or session_data.session_schedule[day] == "allday" %} style="display: none"{% endif %} id="slider-{{ day }}-{{ n }}"></div>
-                                                                      <input type="hidden" id="schedule-{{ day }}-{{ n }}" name="schedule-{{ day }}-{{ n }}" value="{{ session_data.session_schedule[day] }}">
-
-                                                                      <script>
-                                                                   $(function () {
-                                                                       $("#slider-{{day}}-{{ n }}").slider({
-                                                                           range: true,
-                                                                           min: 0,
-                                                                           max: 1440,
-                                                                           step: 30,
-                                                                           {% if session_data.session_schedule[day] == "norun" or session_data.session_schedule[day] == "allday" %}
-                                                                            values: [450,1200], // ignored as if schedule is set to norun or alldays, but values must exist
-                                                                           {% else %}
-                                                                            values: [{{session_data.session_schedule[day].split("-")[0]}}, {{session_data.session_schedule[day].split("-")[1]}}],
-                                                                           {% endif %}
-                                                                    slide: function(event, ui) {
-                                                                        if ((ui.values[1] - ui.values[0]) < 5) {
-                                                                          return false;
-                                                                        }
-                                                                        var startTime = ui.values[0]
-                                                                        var endTime = ui.values[1]
-                                                                        document.getElementById("schedule-{{ day }}-{{ n }}").value = startTime + "-" + endTime;
-                                                                    },
-                                                                       }).slider("float", {
-                                                                           handle: true,
-                                                                           pips: true,
-                                                                           labels: [
-                                                                               '00', "00:30", "01:00", "01:30",
-                                                                               '02:00', "02:30", "03:00", "03:30",
-                                                                               '04:00', "04:30", "05:00", "05:30",
-                                                                               '06:00', "06:30", "07:00", "07:30",
-                                                                               '08:00', "08:30", "09:00", "09:30",
-                                                                               '10:00', "10:30", "11:00", "11:30",
-                                                                               '12:00', "12:30", "13:00", "13:30",
-                                                                               '14:00', "14:30", "15:00", "15:30",
-                                                                               '16:00', "16:30", "17:00", "17:30",
-                                                                               '18:00', "18:30", "19:00", "19:30",
-                                                                               '20:00', "20:30", "20:00", "20:30",
-                                                                               '22:00', "22:30", "21:00", "21:30",
-                                                                               '24:00']}
-                                                                               ).slider("pips", {
-                                                                           rest: "label",
-                                                                           labels: [,,,,,,,"3",,,,,,"6",,,,,,"9",,,,,,"12",,,,,,"15",,,,,,"18",,,,,,"21"]});});
-                                                                      </script>
-                                                                      <br>
-                                                                  {% endfor %}
-                                                              </div>
-                                                          <br>
-
-                                                          <hr>
-
-                                                          <div align="center">
-                                                               <input type="hidden" name="session_number" value="{{ n }}">
-                                                              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                                                               <button type="submit" class="btn btn-primary btn-icon-split">
-                                                                   <span class="icon text-white-50"><i class="far fa-clock"></i></span>
-                                                                   <span style="margin-top:5px;margin-right:10px; margin-left:10px">保存计划表</span>
-                                                               </button>
-                                                          </div>
-                                                          </form>
-
-                                                          </div>
-                                                      </div>
-                                                  </div>
-                                              </div>  <!-- schedule -->
-
                                               {% if terminate_stopped_session > 0 %}
                                                    <hr>
-                                                 如果您不重启的话，您的会话将<strong>在{{ terminate_stopped_session }}小时后</strong> 自动终止.
+                                                  如果您没有重启的话，您的会话将<strong>在{{ terminate_stopped_session }}小时后</strong> 自动终止.
+.
                                               {% endif %}
 
                                           {% elif session_data.session_state == 'running' %}
-                                              <h6>Option1: Browser access</h6>
+                                              <h6>选项1:浏览器访问</h6>
                                               <a target="_blank" href="{{ session_data.url }}?authToken={{ session_data.session_authentication_token }}#{{ session_data.session_id }}" class="btn btn-success btn-icon-split">
                                                   <span class="icon text-white-50">
                                                       <i class="fas fa-check"></i>
@@ -381,9 +283,9 @@
                                               <br><br>
                                               <h6>选项2:采用DCV客户端软件(最佳性能)</h6>
                                               <div class="alert alert-primary" role="alert">
-                                                  下载您的客户端<strong><a href="https://download.nice-dcv.com/" target="_blank"> 此处</a></strong>
+                                                  下载客户端 <strong><a href="https://download.nice-dcv.com/" target="_blank"> 此处</a></strong>
                                               </div>
-                                              <a target="_blank" href="/remote_desktop/client?session={{ n }}" class="btn btn-success btn-icon-split">
+                                              <a target="_blank" href="/remote_desktop_windows/client?session={{ n }}" class="btn btn-success btn-icon-split">
                                                 <span class="icon text-white-50">
                                                   <i class="fas fa-check"></i>
                                                 </span>
@@ -391,11 +293,11 @@
                                               </a>
                                               {% if session_data.support_hibernation == true %}
                                                   {% if hibernate_idle_session > 0 %}
-                                <hr>如果没有在计划表中， 您的会话将<strong> 在{{ hibernate_idle_session }} 小时</strong>没有任何操作之后自动进入休眠状态
+                                                   <hr>如果没有在计划表中， 您的会话将<strong> 在{{ hibernate_idle_session }} 小时</strong>没有任何操作之后自动进入休眠状态
                                                   {% endif %}
                                               {% else %}
                                                 {% if stop_idle_session > 0  %}
-                                              <hr> 如果没有在计划表中，您的会话将 <strong> 在 {{ stop_idle_session }}小时没有任何操作之后自动终止.</strong>.
+                                                   <hr>如果没有在计划表中，您的会话将 <strong> 在 {{ stop_idle_session }}小时</strong>没有任何操作之后自动终止.
                                                 {% endif %}
                                               {% endif %}
 
@@ -406,17 +308,17 @@
                                                   <div class="modal-dialog" role="document">
                                                       <div class="modal-content">
                                                           <div class="modal-header">
-                                                              <h5 class="modal-title" id="exampleModalLabel">会话 {{ session_data.session_name }}的管理员密码</h5>
+                                                              <h5 class="modal-title" id="exampleModalLabel">会话{{ session_data.session_name }}的管理员密码</h5>
                                                               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                                   <span aria-hidden="true">&times;</span>
                                                               </button>
                                                           </div>
                                                           <div class="modal-body">
-                                                              此密码仅用于此会话<br>
+                                                              密码仅用于此会话 <br>
                                                               <strong>用户名:</strong> Administrator <br>
                                                               <strong>会话密码:</strong> {{ session_data.session_local_admin_password }}<br>
                                                               <hr>
-                                                              为了您的方便，我们也已经通过 <code>admin_password.txt</code>文件将凭证信息添加到您的桌面上
+                                                              为了您的使用方便，此凭证信息也已通过 <code>admin_password.txt</code>文件添加到您的桌面
                                                           </div>
                                                       </div>
                                                   </div>
@@ -427,7 +329,7 @@
                                                   <div class="modal-dialog modal-lg" role="document">
                                                       <div class="modal-content">
                                                           <div class="modal-header">
-                                                              <h5 class="modal-title" id="exampleModalLabel">休眠会话{{ session_data.session_name }} <small><a href="https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/Hibernate.html" target="_blank"> Documentation</a> </small></h5>
+                                                              <h5 class="modal-title" id="exampleModalLabel">休眠会话 {{ session_data.session_name }} <small><a href="https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/Hibernate.html" target="_blank"> 文档</a> </small></h5>
                                                               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                                   <span aria-hidden="true">&times;</span>
                                                               </button>
@@ -443,7 +345,7 @@
                                                                       {% endif %}
                                                                   </div>
                                                                   <div align="center">
-                                                                      <form method="get" action="/remote_desktop/delete">
+                                                                      <form method="get" action="/remote_desktop_windows/delete">
                                                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                                           <input type="hidden" name="action" value="hibernate">
                                                                           <input type="hidden" name="session" value="{{ n }}">
@@ -480,7 +382,7 @@
                                                                   所有运行的应用程序将停止(采用"休眠"以尽可能保留状态)
                                                               </div>
                                                               <div align="center">
-                                                                  <form method="get" action="/remote_desktop/delete">
+                                                                  <form method="get" action="/remote_desktop_windows/delete">
                                                                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                                       <input type="hidden" name="action" value="stop">
                                                                       <input type="hidden" name="session" value="{{ n }}">
@@ -499,10 +401,10 @@
                                   {% endfor %}
                               {% else %}
                                   <div class="card-header py-3">
-                                      <h6 class="m-0 font-weight-bold text-primary">Linux 会话 #{{ n }}</h6>
+                                      <h6 class="m-0 font-weight-bold text-primary">Windows 会话 #{{ n }}</h6>
                                   </div>
                                   <div class="card-body">
-                                  <form method="post" action="/remote_desktop/create">
+                                  <form method="post" action="/remote_desktop_windows/create">
                                       <div class="form-group row">
                                         <label for="walltime" data-toggle="tooltip" data-placement="top" title="选择一个简单的名称来标识您的图形会话" class="col-sm-4 col-form-label">会话名称</label>
                                         <div class="col-sm-8">
@@ -510,20 +412,20 @@
                                         </div>
                                       </div>
                                       <div class="form-group row">
-                                          <label for="disk_size" data-toggle="tooltip" data-placement="top" title="选择用于/分区的主SSD磁盘的大小（以GB为单位）." class="col-sm-4 col-form-label">存储空间</label>
+                                          <label for="disk_size" data-toggle="tooltip" data-placement="top" title="选择用于C盘分区的主SSD磁盘的大小（以GB为单位）." class="col-sm-4 col-form-label">存储空间</label>
                                           <div class="col-sm-8">
-                                            <input id="disk_size" value="10" min="10" class="form-control" type="number" name="disk_size">
+                                            <input id="disk_size" value="30" min="30" class="form-control" type="number" name="disk_size">
                                           </div>
                                       </div>
                                       <div class="form-group row">
-                                          <label for="instance_ami" data-toggle="tooltip" data-placement="top" title="指定一个预装应用的镜像" class="col-sm-4 col-form-label">软件堆栈</label>
+                                          <label for="instance_ami" data-toggle="tooltip" data-placement="top" title="Specify an image with pre-installed applications" class="col-sm-4 col-form-label">软件堆栈</label>
                                           <div class="col-sm-8">
                                               <select class="form-control" name='instance_ami' id="instance_ami">
-                                                  <option selected value="ami-0d8487330873f710c,centos7">基础型 (未预装应用软件，宁夏)</option>
-                                                  <option value="ami-088b61f50b18f807e,centos7">基础型 (未预装应用软件，北京)</option>
-                                                    {% for ami_label, ami_info in ami_list.items() %}
-                                                      <option value="{{ ami_info.ami_id }},{{ ami_info.ami_base_os }}">{{ ami_label }} ({{ ami_info.ami_id }})</option>
+                                                  <option selected value="base">基础型 (未预装应用软件)</option>
+                                                  {% for ami_label, ami_id in ami_list.items() %}
+                                                      <option value="{{ ami_id }}">{{ ami_label }} ({{ ami_id }})</option>
                                                   {% endfor %}
+
                                               </select>
                                           </div>
                                       </div>
@@ -537,12 +439,11 @@
                                                   <option value="m5.4xlarge">2D - Large (16 vCPUs - 64 GB ram)</option>
                                                   <option value="m5.12xlarge">2D - Extra Large (48 vCPUs - 192 GB ram)</option>
                                                   <option value="m5.24xlarge">2D - XXL Large (96 vCPUs - 384 GB ram)</option>
-                                                  <option value="" disabled="disabled">-- Quick Launch 3D --</option>
+                                                  <option value="" disabled="disabled">-- 快速启动3D会话 --</option>
                                                   <option value="g4dn.xlarge">3D - Small (4 vCPUs - 16 GB ram - 1 T4 GPU)</option>
                                                   <option value="g4dn.4xlarge">3D - Medium (16 vCPUs - 64 GB ram - 1 T4 GPU)</option>
                                                   <option value="g4dn.8xlarge">3D - Large (32 vCPUs - 128 GB ram - 1 T4 GPU)</option>
                                                   <option value="g4dn.16xlarge">3D - Extra Large (64 vCPUs - 256 GB ram - 1 T4 GPU)</option>
-
                                                   <option value="" disabled="disabled">-- 指定类型 --</option>
                                                   {%  for instance in all_instances %}
                                                       <option value="{{ instance }}">{{ instance }}</option>
@@ -551,15 +452,16 @@
                                           </div>
                                       </div>
                                       <div class="form-group row">
-                                          <label data-toggle="tooltip" data-placement="top" title="休眠节省了重新设置环境或应用程序的精力，并通过缩短应用程序启动时间来节省时间。 使用休眠模式，您可以维护一系列预热实例，这些实例可以在不修改现有应用程序的情况下更快地进入生产状态。" for="hibernate" class="col-sm-4 col-form-label">启用休眠</label>
+                                          <label data-toggle="tooltip" data-placement="top" title="休眠节省了重新设置环境或应用程序的精力，并通过缩短应用程序启动时间来节省时间。 使用休眠模式，您可以维护一系列预热实例，这些实例可以在不修改现有应用程序的情况下更快地进入生产状态。" for="hibernate" class="col-sm-4 col-form-label">启动休眠</label>
                                           <div class="col-sm-8">
                                               <select class="form-control" name='hibernate' id="hibernate">
-                                                  <option value="false" selected>否</option>
+                                                  <option selected value="false">否</option>
                                                   <option value="true">是</option>
                                               </select>
                                           </div>
                                       </div>
-                                     <div class="form-group row">
+
+                                    <div class="form-group row">
                                           <label for="extra" class="col-sm-4 col-form-label">可选配置</label>
                                           <div class="col-sm-8">
                                              <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#advancedOptions{{ n }}" aria-expanded="false">
@@ -572,12 +474,13 @@
                                           <br>
                                           <div>
                                                <div class="form-group">
-                                                   <input id="subnet_id" placeholder="VPC Subnet ID" class="form-control" type="text"  name="subnet_id">
+                                                   <input id="subnet_id" placeholder="VPC Subnet" class="form-control" type="text"  name="subnet_id">
                                                    <small id="subnet_id" class="form-text text-muted">在指定子网内启动您的计算资源</small>
                                                </div>
                                           </div>
                                           <br>
                                       </div>
+
                                      <div align="center">
                                          <hr>
                                          <button type="submit"  class="btn btn-primary btn-icon-split">
