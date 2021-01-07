@@ -192,7 +192,7 @@ Mappings:
       centos7: ami-01e7e7c7ceade27c5
       amazonlinux2: ami-0442b0a087508033e
     cn-northwest-1: # Ningxia
-      rhel7: ami-05d1efb0d288aa5ed
+      rhel7: ami-0cd838eee65b0f445
       centos7: ami-0ce5d0604ed126cca
       amazonlinux2: ami-0959f8e18a2aac0fb
     eu-central-1: # Frankfurt
