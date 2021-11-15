@@ -211,7 +211,7 @@ def index():
                 db.session.commit()
 
         user_sessions[session_number] = {
-            "url": 'https://' + read_secretmanager.get_soca_configuration()['LoadBalancerDNSName'] + '/' + session_host_private_dns +'/',
+            "url": '/' + session_host_private_dns +'/',
             "session_state": session_state,
             "session_authentication_token": dcv_authentication_token,
             "session_id": session_id,
@@ -305,11 +305,16 @@ def create():
 
     user_data = '''#!/bin/bash -x
 export PATH=$PATH:/usr/local/bin
+
 # China repo
-mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
-curl -o /etc/yum.repos.d/CentOS-Base.repo https://'''+soca_configuration['S3PatchBucket']+'''.s3.cn-northwest-1.amazonaws.com.cn/'''+soca_configuration['S3PatchFolder']+'''/templates/tsinghua-CentOS-7.repo
-yum clean all
-yum makecache
+if [[ "''' + base_os + '''" == "centos7" ]];
+then
+    mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
+    curl -o /etc/yum.repos.d/CentOS-Base.repo https://'''+soca_configuration['S3PatchBucket']+'''.s3.cn-northwest-1.amazonaws.com.cn/'''+soca_configuration['S3PatchFolder']+'''/templates/tsinghua-CentOS-7.repo
+    yum clean all
+    yum makecache
+fi
+
 if [[ "''' + base_os + '''" == "centos7" ]] || [[ "''' + base_os + '''" == "rhel7" ]];
 then
         yum install -y python3-pip

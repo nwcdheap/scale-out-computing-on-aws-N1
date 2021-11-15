@@ -519,8 +519,9 @@
                                           <label for="instance_ami" data-toggle="tooltip" data-placement="top" title="指定一个预装应用的镜像" class="col-sm-4 col-form-label">软件堆栈</label>
                                           <div class="col-sm-8">
                                               <select class="form-control" name='instance_ami' id="instance_ami">
-                                                  <option selected value="ami-0d8487330873f710c,centos7">基础型 (未预装应用软件，宁夏)</option>
-                                                  <option value="ami-088b61f50b18f807e,centos7">基础型 (未预装应用软件，北京)</option>
+                                                  <option selected value="base">基础型 (未预装应用软件)</option>
+                                                  <option value="ami-0d8487330873f710c,centos7">基础型 (宁夏centos)</option>
+                                                  <option value="ami-088b61f50b18f807e,centos7">基础型 (北京centos)</option>
                                                     {% for ami_label, ami_info in ami_list.items() %}
                                                       <option value="{{ ami_info.ami_id }},{{ ami_info.ami_base_os }}">{{ ami_label }} ({{ ami_info.ami_id }})</option>
                                                   {% endfor %}

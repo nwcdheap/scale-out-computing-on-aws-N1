@@ -65,11 +65,16 @@ def main(**params):
         # Begin LaunchTemplateData
         UserData = '''#!/bin/bash -x
 export PATH=$PATH:/usr/local/bin
+
 # China repo
-mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
-curl -o /etc/yum.repos.d/CentOS-Base.repo https://'''+params['S3PatchBucket']+'''.s3.cn-northwest-1.amazonaws.com.cn/'''+params['S3PatchFolder']+'''/templates/tsinghua-CentOS-7.repo
-yum clean all
-yum makecache
+if [[ "''' + params['BaseOS'] + '''" == "centos7" ]] ;
+then
+    mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
+    curl -o /etc/yum.repos.d/CentOS-Base.repo https://'''+params['S3PatchBucket']+'''.s3.cn-northwest-1.amazonaws.com.cn/'''+params['S3PatchFolder']+'''/templates/tsinghua-CentOS-7.repo
+    yum clean all
+    yum makecache
+fi
+
 if [[ "''' + params['BaseOS'] + '''" == "centos7" ]] || [[ "''' + params['BaseOS'] + '''" == "rhel7" ]];
 then
      yum install -y python3-pip

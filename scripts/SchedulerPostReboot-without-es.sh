@@ -160,6 +160,10 @@ S3PatchFolder="$6"
 wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_manager/cloudformation_builder-without-es.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_manager/cloudformation_builder.py
 wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_manager/add_nodes-without-es.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_manager/add_nodes.py
 #replace web UI
+mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/config.py /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/config_bak.py
+wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_web_ui/config.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/config.py
+mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/scheduled_tasks/manage_dcv_instances_lifecycle.py /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/scheduled_tasks/manage_dcv_instances_lifecycle_bak.py
+wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_web_ui/scheduled_tasks/manage_dcv_instances_lifecycle.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/scheduled_tasks/manage_dcv_instances_lifecycle.py
 mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/submit_job.py /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/submit_job_bak.py
 wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_web_ui/views/submit_job.py -O /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/submit_job.py
 mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/remote_desktop.py /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/views/remote_desktop_bak.py
@@ -168,7 +172,9 @@ mv /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/templates /apps/soca/$SOCA_CONF
 wget https://${S3PatchBucket}.s3.cn-northwest-1.amazonaws.com.cn/${S3PatchFolder}/cluster_web_ui/templates.zip -O /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/templates.zip
 unzip /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/templates.zip -d /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/
 #replace cluster node
+$AWS s3 cp s3://$S3PatchBucket/$S3PatchFolder/cluster_node_bootstrap/ComputeNode.sh /apps/soca/$SOCA_CONFIGURATION/cluster_node_bootstrap/ --region=cn-northwest-1 --no-sign-request
 $AWS s3 cp s3://$S3PatchBucket/$S3PatchFolder/cluster_node_bootstrap/ComputeNodeInstallDCV.sh /apps/soca/$SOCA_CONFIGURATION/cluster_node_bootstrap/ --region=cn-northwest-1 --no-sign-request
+$AWS s3 cp s3://$S3PatchBucket/$S3PatchFolder/cluster_node_bootstrap/ComputeNodePostReboot.sh /apps/soca/$SOCA_CONFIGURATION/cluster_node_bootstrap/ --region=cn-northwest-1 --no-sign-request
 #add x
 chmod +x /apps/soca/$SOCA_CONFIGURATION/cluster_web_ui/unix/puttygen
 

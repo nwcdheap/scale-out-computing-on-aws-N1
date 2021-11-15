@@ -8,6 +8,7 @@ AWS=$(which aws)
 INSTANCE_FAMILY=`curl --silent  http://169.254.169.254/latest/meta-data/instance-type | cut -d. -f1`
 echo "Detected Instance family $INSTANCE_FAMILY"
 GPU_INSTANCE_FAMILY=(g3 g4 g4dn)
+GPU_P_INSTANCE_FAMILY=(p3)
 
 # Install Gnome or  Mate Desktop
 if [[ $SOCA_BASE_OS == "rhel7" ]]
@@ -34,6 +35,25 @@ then
   rm -f /root/NVIDIA-Linux-x86_64*.run
   #$AWS s3 cp --quiet --recursive s3://ec2-linux-nvidia-drivers/latest/ .
   $AWS s3 cp s3://nwcd-samples/ec2-linux-nvidia-drivers/latest/NVIDIA-Linux-x86_64.run .  --region=cn-northwest-1 --no-sign-request
+  rm -rf /tmp/.X*
+  /bin/sh /root/NVIDIA-Linux-x86_64*.run -q -a -n -X -s
+  NVIDIAXCONFIG=$(which nvidia-xconfig)
+  $NVIDIAXCONFIG --preserve-busid --enable-all-gpus
+  yum install -y compat-libtiff3
+  cp /etc/nvidia/gridd.conf.template /etc/nvidia/gridd.conf
+  echo "IgnoreSP=TRUE" >> /etc/nvidia/gridd.conf
+  sed -i 's/"DPMS"/"DPMS" "false"/' /etc/X11/xorg.conf
+  echo 'Section "ServerFlags"
+    Option "BlankTime" "0"
+EndSection' >> /etc/X11/xorg.conf
+fi
+if [[ "${GPU_P_INSTANCE_FAMILY[@]}" =~ "${INSTANCE_FAMILY}" ]];
+then
+  # clean previously installed drivers
+  echo "Detected GPU instance .. installing NVIDIA Drivers"
+  rm -f /root/NVIDIA-Linux-x86_64*.run
+  #$AWS s3 cp --quiet --recursive s3://ec2-linux-nvidia-drivers/latest/ .
+  $AWS s3 cp s3://nwcd-samples/ec2-linux-nvidia-drivers/latest/NVIDIA-Linux-x86_64-official.run .  --region=cn-northwest-1 --no-sign-request
   rm -rf /tmp/.X*
   /bin/sh /root/NVIDIA-Linux-x86_64*.run -q -a -n -X -s
   NVIDIAXCONFIG=$(which nvidia-xconfig)

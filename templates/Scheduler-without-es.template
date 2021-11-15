@@ -126,7 +126,7 @@ Resources:
             then
               yum install -y python3-pip
               PIP=$(which pip3)
-              $PIP install -i https://opentuna.cn/pypi/web/simple awscli==1.16.300
+              $PIP install -i https://opentuna.cn/pypi/web/simple awscli
               export PATH=$PATH:/usr/local/bin
             fi
 

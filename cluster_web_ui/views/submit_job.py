@@ -108,7 +108,10 @@ def send_job():
             if cpus_count_pattern:
                 cpu_per_system = int(cpus_count_pattern.group(1)) * 2
             else:
-                cpu_per_system = 2
+                if instance_type.find(".large") != -1:
+                    cpu_per_system = 1
+                else:
+                    cpu_per_system = 2
             nodect = math.ceil(int(cpus) / cpu_per_system)
 
         find_shebang = re.search(r'#!([^\s]+)', job_to_submit)

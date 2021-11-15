@@ -29,6 +29,7 @@ fi
 yum install -y $(echo ${OPENLDAP_SERVER_PKGS[*]} ${SSSD_PKGS[*]})
 
 # Mount EFS
+resize2fs /dev/nvme1n1
 mkdir /apps
 mkdir /data
 echo "/dev/nvme1n1 /apps ext3 defaults 0 0" >> /etc/fstab

@@ -5,9 +5,9 @@ SOCA是AWS基于自身在工程仿真分析平台的构建和使用中积累的�
 ![](images/01.png) 
 该解决方案的核心在于实现计划程序 Amazon Elastic Compute Cloud (Amazon EC2) 实例，以利用 AWS CloudFormation 和 Amazon EC2 Auto Scaling 自动启动执行集群用户任务（如扩展计算任务和远程虚拟会话）所需的资源。
 此外，该解决方案还会部署 Amazon Elastic File System (Amazon EFS) 或通过EBS以NFS方式实现永久存储；AWS Lambda 函数用于验证所需满足的前提条件并为 Application Load Balancer (ALB) 创建一个默认的已签署证书以管理对 Desktop Cloud Visualization (DCV) 工作站会话的访问；Amazon Elasticsearch Service (Amazon ES) 集群用于存储任务和托管信息（可选）；以及 AWS Secrets Manager 用于存储解决方案配置文件。该解决方案还会利用 AWS Identity and Access Management (IAM) 角色强制执行最低特权访问。
-SOCA使用AWS CloudFormation 模板以部署基础架构组件，AWS服务，操作系统和管理软件以及自定义逻辑脚本，可实现一键式部署。在中国宁夏区域我们提供了两种解决方案模板可供选择：
-- 通过EBS以NFS方式实现共享存储，集成有ElasticSearch服务，CloudFormation地址：https://nwcd-samples.s3.cn-northwest-1.amazonaws.com.cn/soca/v2.5.1/templates/scale-out-computing-on-aws.yaml
-- 通过EBS以NFS方式实现共享存储，不集成ElasticSearch服务，CloudFormation地址：https://nwcd-samples.s3.cn-northwest-1.amazonaws.com.cn/soca/v2.5.1/templates/scale-out-computing-on-aws-without-es.yaml  
+SOCA使用AWS CloudFormation 模板以部署基础架构组件，AWS服务，操作系统和管理软件以及自定义逻辑脚本，可实现一键式部署。  
+CloudFormation地址：https://nwcd-samples.s3.cn-northwest-1.amazonaws.com.cn/soca/v2.6.4/templates/scale-out-computing-on-aws-without-es.template
+ 
 
 如果您已有AWS中国区域的账号，只需点击进入Cloudfomation服务控制台，`创建堆栈`
 ![](images/02.png) 
