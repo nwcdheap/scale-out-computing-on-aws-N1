@@ -95,3 +95,5 @@ cdk.context.json
 *data_cn
 *data_en
 *temp
+/installer/installer_history.txt
+installer/dist/

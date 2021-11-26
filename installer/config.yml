@@ -1,0 +1,49 @@
+Config:
+  bucket: "nwcd-samples"
+  bucket_folder: "soca/v2.6.5"
+  version: "v2.6.5" # version automatically populated as part of RELEASE-PIPELINE.sh
+  termination_protection: True # Enable (recommended) or Disable Cloudformation Stack termination protection
+  entry_points_subnets: "Public" # Public (recommended) or Private. In public mode the scheduler and ELB are deployed on PublicSubnets and assigned Public IPS. In Private mode scheduler and ELB are deployed in private subnets. In both case compute nodes and ElasticSearch/EFS/FSxL are deployed in private subnets. Public does not means your cluster will be accessible to everyone by default, access to your cluster is still protected by security groups
+
+  # Configure your Network parameters below (CIDR range is configured interactively --vpc-cidr
+  network:
+    nat_gateways: 1 # Number of NAT gateways to create. Must be equal or lower to the numbers of public subnets
+    max_azs: 3 # Number of AZs to use. We will deploy the same number of private and public subnets. Must be greater than 2
+
+  # Configure your EC2 instance used as scheduler host below
+  scheduler:
+    instance_type: "m5.large" # default instance type
+    volume_size: 200 # Size of the EBS root disk
+    volume_size_apps: 100 # Size of the EBS apps disk
+    apps_map:
+      cn-northwest-1: snap-06e07d0d9614db37a
+      cn-north-1: snap-0fb801cbe52297686
+
+  # Configure your AWS Secrets Manager options below
+  secretsmanager:
+    kms_key_id: False # (Experimental) Specify your own CMK to encrypt your Secret manager. If set to False encryption will be managed by the default AWS key
+
+  # Configure your AWS Backup options below
+  backups:
+    delete_after: 7 # (Experimental) In Days, choose backup retention period
+
+  # Configure your Directory options below
+  directoryservice:
+    provider: "openldap" # openldap (recommended) or activedirectory (experimental)
+    openldap:
+      name: "soca.local" # base DN for your OpenLDAP. SOCA will create 3 OUs: People, Group and Sudoers. Edit source/scripts/Scheduler.sh if you need to edit these OUs
+
+  # Configure your AWS China Regions options below
+  china:
+    pip_china_mirror: "https://opentuna.cn/pypi/web/simple" # pip China mirror site
+    centos_china_repo: "https://nwcd-samples.s3.cn-northwest-1.amazonaws.com.cn/software/CentOS-Base-china.repo" # centos China mirror repo file
+
+RegionMap:
+  cn-north-1: # Beijing
+    amazonlinux2: ami-0c52e2685c7218558
+    centos7: ami-01e7e7c7ceade27c5
+    rhel7: ami-07b049a038bb4f989
+  cn-northwest-1: # Ningxia
+    amazonlinux2: ami-05b9b6d6acf8ae9b6
+    centos7: ami-0ce5d0604ed126cca
+    rhel7: ami-0f5170b65aecf2eba

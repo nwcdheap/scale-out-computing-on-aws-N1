@@ -1,34 +1,7 @@
 # 使用手册
-SOCA是AWS基于自身在工程仿真分析平台的构建和使用中积累的经验，推出的开源端到端高性能计算（HPC）平台解决方案。SOCA是一种可帮助客户轻松部署和操作多用户环境，从而支持计算机辅助工程 (CAE) 等计算密集型工作流的解决方案。该解决方案具有多种可选的计算资源、快速网络主干、无限存储空间以及直接集成在 AWS 中的预算和成本管理。该解决方案部署了提供云工作站、文件管理和自动化工具的用户界面 (UI)，您可以创建自己的队列、调度程序资源、Amazon 系统映像 (AMI) 以及用于用户和组权限的管理功能。
-## 如何部署SOCA平台
-部署此解决方案将在AWS Cloud中构建以下环境。
-![](images/01.png) 
-该解决方案的核心在于实现计划程序 Amazon Elastic Compute Cloud (Amazon EC2) 实例，以利用 AWS CloudFormation 和 Amazon EC2 Auto Scaling 自动启动执行集群用户任务（如扩展计算任务和远程虚拟会话）所需的资源。
-此外，该解决方案还会部署 Amazon Elastic File System (Amazon EFS) 或通过EBS以NFS方式实现永久存储；AWS Lambda 函数用于验证所需满足的前提条件并为 Application Load Balancer (ALB) 创建一个默认的已签署证书以管理对 Desktop Cloud Visualization (DCV) 工作站会话的访问；Amazon Elasticsearch Service (Amazon ES) 集群用于存储任务和托管信息（可选）；以及 AWS Secrets Manager 用于存储解决方案配置文件。该解决方案还会利用 AWS Identity and Access Management (IAM) 角色强制执行最低特权访问。
-SOCA使用AWS CloudFormation 模板以部署基础架构组件，AWS服务，操作系统和管理软件以及自定义逻辑脚本，可实现一键式部署。  
-CloudFormation地址：https://nwcd-samples.s3.cn-northwest-1.amazonaws.com.cn/soca/v2.6.4/templates/scale-out-computing-on-aws-without-es.template
- 
-
-如果您已有AWS中国区域的账号，只需点击进入Cloudfomation服务控制台，`创建堆栈`
-![](images/02.png) 
-在“指定堆栈详细信息”页面填写部署SOCA所需信息：  
-“堆栈名称”：（用户自定义）  
-“Linux Distro”: 选择SOCA解决方案中所有EC2实例的操作系统，可在Centos7（默认），Redhat7，AmazonLinux三个操作系统中选择。可保持默认。  
-“AppsEBSSnap”：如果已有安装好仿真软件的EBS存储盘快照，可以直接输入快照id（snap-××××××××），无需重新安装。如果没有保持默认，创建空的共享EBS存储盘。  
-“Instance type for your master host”：设置主节点实例类型，可保持默认。  
-“Create your new VPC”：设置SOCA所在VPC的私有IP地址范围，可保持默认。  
-“What's your IP?”：设置可访问SOCA平台的IP地址范围。不要设置为0.0.0.0/0  
-“What's your SSH keypair?”：选择您在中国宁夏区域已有的SSH密匙对，如果没有请先在EC2控制台中创建。  
-“Username for your default LDAP user”：登录SOCA平台的初始用户名（用户自定义）   
-“Password for your default LDAP user”：登录SOCA平台的初始密码（用户自定义）  
-点击`下一步`->`下一步  `
-在`审核`页面勾选最下方的2个复选框，点击`创建堆栈` 
-![](images/03.png) 
-等待30分钟左右，堆栈创建完成，点击根堆栈，选择“输出”选项卡，点击WebUserInterface链接.
-![](images/04.png) 
+## 如何访问SOCA平台
 输入部署时设置的用户名和密码登录，即可进入SOCA平台主页面。
 ![](images/05.png) 
-## 如何访问SOCA平台
 您可以使用DCV（桌面云可视化）或通过SSH访问SOCA平台。
 ### SSH访问
 要使用SSH协议访问SOCA平台，只需单击左侧导航栏中的“ SSH访问”，然后按照说明进行操作。您可以从SOCA平台下载PEM或PPK格式的私钥用于连接。
@@ -143,64 +116,7 @@ python3 /apps/soca/$SOCA_CONFIGURATION/cluster_manager/add_nodes.py --instance_t
 如果需要，您可以添加/删除给定组中的用户。
 ### 删除群组
 最后，要删除组，只需导航至“删除组”选项卡。
-## 设置分析功能
-SOCA平台在运行过程中产生许多指标值（作业计数，计算节点计数，使用的计算节点类型，仿真时间，仿真计算价格等），能够将这些指标值实时转换为有意义的数据对于保持组织的敏捷性非常重要。SOCA可以利用 AWS支持的分析，报表和商业智能工具来实现对HPC平台的实时洞察。  
-如果选择带有ElasticSearch功能的Cloudfomation模板部署后，SOCA平台自动将产生的带有各种标签的日志信息发送至AWS ElasticSearch服务，以用于检索和分析。同时SOCA平台还可以集成Metricbeat轻量级软件来定期从操作系统和服务器上运行的服务收集指标。  
-注：默认情况下，MetricBeat是禁用的。要启用它，可以使用提交作业 -l system_metrics=True或在队列级别启用此参数。启用此功能后，SOCA将在为您的作业启动的所有计算节点上自动安装和配置MetricBeat。  
-### 如何使用分析平台
-点击左侧导航栏中的“集群分析指标”菜单。可以看到SOCA平台关联的AWS ElasticSearch分析平台的控制台链接。点击链接访问AWS ElasticSearch控制台。
 
-#### 1.创建索引
-点击左侧导航栏中的“Management”菜单，然后点击“Index Patterns”
-![](images/26.png) 
-输入pbsnodes *创建您的第一个索引。
-![](images/27.png) 
-单击“下一步”，然后选择“timestamp”。完成后，单击“Create Index Pattern”。
-![](images/28.png) 
-对jobs*索引重复相同的操作。
-![](images/29.png) 
-这次，选择start_iso作为时间过滤器键。
-![](images/30.png) 
-配置完索引后，转到Kibana，选择“Discover”选项卡以开始可视化数据。
-![](images/31.png) 
-![](images/32.png) 
-#### 2.创建分析仪表板
-点击Kibana导航栏中的“Visualize”以创建新的可视化。
-如分析按实例类型分类的每用户作业数量统计分析。
-![](images/33.png) 
-![](images/34.png) 
- 
-#### 3.使用仪表板进行分析
-点击Kibana导航栏中的“Dashboard”以查看分析仪表板。如果之前有启动MetricBeat功能，则MetricBeat将自动集成到ElasticSearch集群。可以在仪表板中看到MetricBeat生成的报表。
-![](images/35.png) 
-如“Host Overview ECS”仪表板将为您提供与按作业，用户或队列启动的计算节点有关的系统信息。默认情况下，ELK报告“过去15分钟”数据
-![](images/36.png) 
-您可以按作业ID，作业所有者，队列，进程名称或主机IP筛选结果。请参见下面的示例，该示例返回作业19544的指标信息。
-![](images/37.png) 
-#### 4.利用AWS Cost Explorer服务进行成本分析。
-由SOCA启动的任何EC2资源都附带有详尽的EC2标签列表，可用于获取有关群集使用情况的详细信息。列表包括（但不限于）：
-- 项目名称
-- 工作负责人
-- 工作名称
-- 作业队列
-- 工作编号
-
-这些是默认标签，您可以根据需要添加自己的标签。
-##### 步骤1：启用费用分配标签
-点击您的帐户名（1），然后选择“我的结算信息中心”（2）
-![](images/38.png) 
-然后点击“费用分配标签”
-![](images/39.png) 
-最后，搜索所有“ SOCA”标签，然后单击“激活”
-![](images/40.png) 
-##### 步骤2：启用Cost Explorer
-在结算信息中心中，选择“费用管理器”（1），然后单击“启用费用管理器”（2）。
-![](images/41.png) 
-##### 步骤3：查询Cost Explorer
-打开“费用浏览器”标签，然后指定过滤器。在此示例中，我要获取名为“ cpus”的队列（2）的EC2成本（1），按天分组。
-![](images/42.png) 
-要获取更多详细信息，请选择 'Group By'并应用其他过滤器。例如，如果希望看到“ cpus”队列的用户级别信息，请单击“Group By”水平标签（1）下的“标签”部分，然后选择“ soca：JobOwner”标签。用户的“ cpus”队列将按费用明细自动更新您的图表
-![](images/43.png) 
 
 ## 使用自定义域名通过https访问
 直接使用CloudFormation输出的ALB地址访问时，浏览器会提示访问不安全，这是因为没有正确配置https的证书。  
