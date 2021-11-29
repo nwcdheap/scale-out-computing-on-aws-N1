@@ -31,7 +31,6 @@ def main(**launch_parameters):
         t = Template()
         t.set_version("2010-09-09")
         t.set_description("(SOCA) - Base template to deploy DCV nodes")
-        allow_anonymous_data_collection = launch_parameters["DefaultMetricCollection"]
         # Launch Actual Capacity
         instance = ec2.Instance(str(launch_parameters["session_name"]))
         instance.BlockDeviceMappings = [{'DeviceName': "/dev/xvda" if launch_parameters["base_os"] == "amazonlinux2" else "/dev/sda1",
@@ -60,27 +59,6 @@ def main(**launch_parameters):
             _soca_DCVSessionUUID=str(launch_parameters["session_uuid"]),
             _soca_DCVSystem=str(launch_parameters["base_os"]))
         t.add_resource(instance)
-
-        # Begin Custom Resource
-        # Change Mapping to No if you want to disable this
-        if allow_anonymous_data_collection is True:
-            metrics = CustomResourceSendAnonymousMetrics("SendAnonymousData")
-            metrics.ServiceToken = launch_parameters["SolutionMetricLambda"]
-            metrics.DesiredCapacity = "1"
-            metrics.InstanceType = str(launch_parameters["instance_type"])
-            metrics.Efa = "false"
-            metrics.ScratchSize = "0"
-            metrics.RootSize = str(launch_parameters["disk_size"])
-            metrics.SpotPrice = "false"
-            metrics.BaseOS = str(launch_parameters["base_os"])
-            metrics.StackUUID = str(launch_parameters["session_uuid"])
-            metrics.KeepForever = "false"
-            metrics.FsxLustre = str({"fsx_lustre": "false", "existing_fsx": "false", "s3_backend": "false", "import_path": "false", "export_path": "false",
-                                     "deployment_type": "false", "per_unit_throughput": "false", "capacity": 1200})
-            metrics.TerminateWhenIdle = "false"
-            metrics.Dcv = "true"
-            t.add_resource(metrics)
-        # End Custom Resource
 
         # Tags must use "soca:<Key>" syntax
         template_output = t.to_yaml().replace("_soca_", "soca:")

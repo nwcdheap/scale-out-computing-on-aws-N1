@@ -700,10 +700,6 @@ def main(**kwargs):
                 'Key': None,
                 'Default': aligo_configuration['SchedulerPrivateDnsName']
             },
-            'SolutionMetricLambda': {
-                'Key': None,
-                'Default': aligo_configuration['SolutionMetricLambda']
-            },
             'SpotAllocationCount': {
                 'Key': 'spot_allocation_count',
                 'Default': False

@@ -448,8 +448,6 @@ $AWS s3 cp s3://$SOCA_INSTALL_BUCKET/$SOCA_INSTALL_BUCKET_FOLDER/scripts/config.
                          "cluster_id": soca_configuration["ClusterId"],
                          "hibernate": parameters["hibernate"],
                          "user": session["user"],
-                         "DefaultMetricCollection": True if soca_configuration["DefaultMetricCollection"] == "true" else False,
-                         "SolutionMetricLambda": soca_configuration['SolutionMetricLambda'],
                          "ComputeNodeInstanceProfileArn": soca_configuration["ComputeNodeInstanceProfileArn"]
                          }
     dry_run_launch = can_launch_instance(launch_parameters)

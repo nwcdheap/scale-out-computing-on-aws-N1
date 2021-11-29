@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
 ====== 您想如何安装SOCA ? ======\n
     1 > 新建VPC
-    2 > 使用现有VPC""")
+    2 > 使用现有VPC，请确认现有VPC有3个公有子网、3个私有子网，并且3个私有子网都有对应的NAT Gateway""")
     mode = get_input("请输入", args.mode, [1, 2], int)
 
     # Load AWS custom profile if specified

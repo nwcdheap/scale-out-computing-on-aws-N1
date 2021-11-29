@@ -368,8 +368,6 @@ def create():
                          "cluster_id": soca_configuration["ClusterId"],
                          "hibernate": parameters["hibernate"],
                          "user": session["user"],
-                         "DefaultMetricCollection": True if soca_configuration["DefaultMetricCollection"] == "true" else False,
-                         "SolutionMetricLambda": soca_configuration['SolutionMetricLambda'],
                          "ComputeNodeInstanceProfileArn": soca_configuration["ComputeNodeInstanceProfileArn"]
                          }
     dry_run_launch = can_launch_instance(launch_parameters)

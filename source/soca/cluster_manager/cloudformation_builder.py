@@ -53,7 +53,6 @@ def main(**params):
         t = Template()
         t.set_version("2010-09-09")
         t.set_description("(SOCA) - Base template to deploy compute nodes. Version 2.6.0")
-        allow_anonymous_data_collection = params["MetricCollectionAnonymous"]
         debug = False
         mip_usage = False
         instances_list = params["InstanceType"] # list of instance type. Use + to specify more than one type
@@ -402,25 +401,7 @@ $AWS s3 cp s3://$SOCA_INSTALL_BUCKET/$SOCA_INSTALL_BUCKET_FOLDER/scripts/config.
                 t.add_resource(fsx_lustre)
         # End FSx For Lustre
 
-        # Begin Custom Resource
-        # Change Mapping to No if you want to disable this
-        if allow_anonymous_data_collection is True:
-            metrics = CustomResourceSendAnonymousMetrics("SendAnonymousData")
-            metrics.ServiceToken = params["SolutionMetricLambda"]
-            metrics.DesiredCapacity = str(params["DesiredCapacity"])
-            metrics.InstanceType = str(params["InstanceType"])
-            metrics.Efa = str(params["Efa"])
-            metrics.ScratchSize = str(params["ScratchSize"])
-            metrics.RootSize = str(params["RootSize"])
-            metrics.SpotPrice = str(params["SpotPrice"])
-            metrics.BaseOS = str(params["BaseOS"])
-            metrics.StackUUID = str(params["StackUUID"])
-            metrics.KeepForever = str(params["KeepForever"])
-            metrics.FsxLustre = str(params["FSxLustreConfiguration"])
-            metrics.TerminateWhenIdle = str(params["TerminateWhenIdle"])
-            metrics.Dcv = "false"
-            t.add_resource(metrics)
-        # End Custom Resource
+
 
         if debug is True:
             print(t.to_json())

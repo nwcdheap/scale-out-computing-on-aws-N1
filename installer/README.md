@@ -23,22 +23,22 @@ ln -s /usr/software/nodejs/bin/node /usr/local/bin/
 ## 安装Python3
 ## 创建virtualenv:
 ```
-$ python -m venv .env
+python -m venv .env
 ```
 ## 进入virtualenv
 ### Linux
 ```
-$ source .env/bin/activate
+source .env/bin/activate
 ```
 ### Windows
 ```
-% .env\Scripts\activate.bat
+.env\Scripts\activate.bat
 ```
 ## 安装requirements
 ```
-$ pip install -r requirements.txt -i https://opentuna.cn/pypi/web/simple/
+pip install -r requirements.txt -i https://opentuna.cn/pypi/web/simple/
 ```
 ## 部署
 ```
-$ python3 install_soca.py
+python3 install_soca.py
 ```

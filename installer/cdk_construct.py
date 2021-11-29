@@ -18,8 +18,6 @@ import json
 import sys
 import yaml
 from yaml.scanner import ScannerError
-import random
-import string
 from types import SimpleNamespace
 
 
@@ -158,13 +156,6 @@ class SOCAInstall(cdk.Stack):
 
         for nat_eip in self.soca_resources["nat_gateway_ips"]:
             self.soca_resources["scheduler_sg"].add_ingress_rule(ec2.Peer.ipv4(f"{nat_eip.ref}/32"), ec2.Port.tcp(443), description=f"Allow NAT EIP to communicate to ELB/Scheduler")
-
-        # Special rules are needed when using AWS Directory Services
-        if install_props.Config.directoryservice.provider == "activedirectory":
-            self.soca_resources["compute_node_sg"].add_ingress_rule(ec2.Peer.ipv4(self.soca_resources["vpc"].vpc_cidr_block), ec2.Port.udp_range(0, 1024), description="Allow all UDP traffic from VPC to compute. Required for Directory Service")
-            self.soca_resources["compute_node_sg"].add_egress_rule(ec2.Peer.ipv4("0.0.0.0/0"), ec2.Port.udp_range(0, 1024), description="Allow all Egress UDP traffic for ComputeNode SG. Required for Directory Service")
-            self.soca_resources["scheduler_sg"].add_ingress_rule(ec2.Peer.ipv4(self.soca_resources["vpc"].vpc_cidr_block), ec2.Port.udp_range(0, 1024), description="Allow all UDP traffic from VPC to scheduler. Required for Directory Service")
-            self.soca_resources["scheduler_sg"].add_egress_rule(ec2.Peer.ipv4("0.0.0.0/0"), ec2.Port.udp_range(0, 1024), description="Allow all Egress UDP traffic for Scheduler SG. Required for Directory Service")
 
     def iam_roles(self):
         """
