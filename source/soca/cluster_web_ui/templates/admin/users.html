@@ -70,7 +70,12 @@
                                           <input id="uid" placeholder="(可选) 用户 UID" class="form-control" type="number" min=5000 max=65534 name="uid">
                                       </div>
                                        <div class="form-group">
-                                          <input id="gid" placeholder="(可选) 用户 GID" class="form-control" type="number" min=5000 max=65534 name="gid">
+                                          <select class="form-control" id="gid" name="gid">
+                                               <option selected value="">新建组</option>
+                                            {% for group,value in all_groups.items() %}
+                                                <option value="{{value["gid"]}}">加入 {{group}} 组</option>
+                                            {% endfor %}
+                                           </select>
                                       </div>
                                       <div class="form-group">
                                            <select class="form-control" id="shell" name="shell">

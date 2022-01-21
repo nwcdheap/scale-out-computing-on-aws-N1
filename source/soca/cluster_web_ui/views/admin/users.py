@@ -21,13 +21,24 @@ def index():
                         verify=False).json()
 
     all_users = get_all_users["message"].keys()
+    
+    get_all_groups = get(config.Config.FLASK_ENDPOINT + "/api/ldap/groups",
+                         headers={"X-SOCA-TOKEN": session["api_key"],
+                                  "X-SOCA-USER": session["user"]},
+                         verify=False)
+
+    if get_all_groups.status_code == 200:
+        all_groups = get_all_groups.json()["message"]
+    else:
+        flash("Unable to list groups: " + str(get_all_groups._content), "error")
+        all_groups = {}
     try:
         get_all_shells = subprocess.check_output(["cat", "/etc/shells"])
         all_shells = get_all_shells.decode("utf-8").split("\n")[:-1] # remove last empty
     except Exception as err:
         logger.error("Unable to retrieve shells installed on the system")
         all_shells = ["/bin/bash"]
-    return render_template('admin/users.html', user=session['user'], all_users=sorted(all_users), all_shells=all_shells)
+    return render_template('admin/users.html', user=session['user'], all_users=sorted(all_users), all_shells=all_shells, all_groups=all_groups)
 
 
 @admin_users.route('/admin/manage_sudo', methods=['POST'])

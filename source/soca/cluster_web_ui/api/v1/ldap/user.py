@@ -197,11 +197,13 @@ class User(Resource):
             if uid in current_ldap_ids["message"]['uid_in_use']:
                 return errors.all_errors("UID_ALREADY_IN_USE")
 
+        newgroup = False
         if gid == 0:
+            newgroup = True
             gid = current_ldap_ids["message"]['proposed_gid']
-        else:
-            if gid in current_ldap_ids["message"]['gid_in_use']:
-                return errors.all_errors("GID_ALREADY_IN_USE")
+        #else:
+        #    if gid in current_ldap_ids["message"]['gid_in_use']:
+        #        return errors.all_errors("GID_ALREADY_IN_USE")
         try:
             conn = ldap.initialize('ldap://' + config.Config.LDAP_HOST)
             dn_user = "uid=" + user + ",ou=people," + config.Config.LDAP_BASE_DN
@@ -233,25 +235,27 @@ class User(Resource):
             conn.simple_bind_s(config.Config.ROOT_DN, config.Config.ROOT_PW)
 
             # Create group first to prevent GID issue
-            create_user_group = post(config.Config.FLASK_ENDPOINT + "/api/ldap/group",
+            if newgroup:
+                create_user_group = post(config.Config.FLASK_ENDPOINT + "/api/ldap/group",
                                      headers={"X-SOCA-TOKEN": config.Config.API_ROOT_KEY},
                                      data={"group": user, "gid": gid},
                                      verify=False)
-            if create_user_group.status_code != 200:
-                return errors.all_errors("COULD_NOT_CREATE_GROUP", str(create_user_group.text))
+                if create_user_group.status_code != 200:
+                    return errors.all_errors("COULD_NOT_CREATE_GROUP", str(create_user_group.text))
 
             # Assign user
             conn.add_s(dn_user, attrs)
 
-            # Add user to group
-            update_group = put(config.Config.FLASK_ENDPOINT + "/api/ldap/group",
-                               headers={"X-SOCA-TOKEN": config.Config.API_ROOT_KEY},
-                               data={"group": user,
-                                     "user": user,
-                                     "action": "add"},
-                               verify=False)
-            if update_group.status_code != 200:
-                return {"success": True, "message": "User/Group created but could not add user to his group"}, 203
+            if newgroup:
+                # Add user to group
+                update_group = put(config.Config.FLASK_ENDPOINT + "/api/ldap/group",
+                                   headers={"X-SOCA-TOKEN": config.Config.API_ROOT_KEY},
+                                   data={"group": user,
+                                         "user": user,
+                                         "action": "add"},
+                                   verify=False)
+                if update_group.status_code != 200:
+                    return {"success": True, "message": "User/Group created but could not add user to his group"}, 203
 
             # Create home directory
             if create_home(user) is False:
@@ -323,8 +327,9 @@ class User(Resource):
 
             today = datetime.datetime.utcnow().strftime("%s")
             user_home = config.Config.USER_HOME + "/" + user
-            backup_folder = config.Config.USER_HOME + "/" + user + "_" + today
-            shutil.move(user_home, backup_folder)
+            if os.path.exists(user_home):
+                backup_folder = config.Config.USER_HOME + "/" + user + "_" + today
+                shutil.move(user_home, backup_folder)
             for entry in entries_to_delete:
                 try:
                     conn.delete_s(entry)

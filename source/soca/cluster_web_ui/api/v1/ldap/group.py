@@ -49,12 +49,13 @@ class Group(Resource):
         group_filter = 'cn=' + group
         try:
             conn = ldap.initialize('ldap://' + config.Config.LDAP_HOST)
-            groups = conn.search_s(group_search_base, group_search_scope, group_filter, ["cn", "memberUid"])
+            groups = conn.search_s(group_search_base, group_search_scope, group_filter, ["cn", "memberUid","gidNumber"])
             if groups.__len__() == 0:
                 return errors.all_errors("GROUP_DO_NOT_EXIST")
 
             for group in groups:
                 group_base = group[0]
+                gid = group[1]["gidNumber"][0].decode("utf-8")
                 members = []
                 if "memberUid" in group[1].keys():
                     for member in group[1]["memberUid"]:
@@ -65,7 +66,7 @@ class Group(Resource):
                             members.append(member.decode("utf-8"))
                             # return {"success": False, "message": "Unable to retrieve memberUid for this group: " + str(group_base) + "members: "+str(group[1]["memberUid"])}, 500
 
-            return {"success": True, "message": {"group_dn": group_base, "members": members}}
+            return {"success": True, "message": {"group_dn": group_base, "members": members, "gid": gid}}
 
         except Exception as err:
             return errors.all_errors(type(err).__name__, err)
